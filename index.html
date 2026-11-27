@@ -325,6 +325,7 @@ function changeCart(id,delta){
  render();
  if(!document.getElementById('cart-overlay').classList.contains('hidden'))renderCart();
 }
+
 function openCart(){
  if(!state.cart.length)return toast('Your cart is empty.');
 
@@ -339,6 +340,7 @@ function openCart(){
  document.getElementById('cart-overlay').classList.remove('hidden');
  renderCart();
 }
+
 function closeCart(){
  document.getElementById('cart-overlay').classList.add('hidden');
 }
@@ -483,6 +485,7 @@ const auth=getAuth(firebaseApp);
 const db=getFirestore(firebaseApp);
 
 let firebaseCustomer=null;
+ window.firebaseCustomer = null;
 let confirmationResult=null;
 let recaptchaVerifier=null;
 let orderBusy=false;
@@ -825,49 +828,31 @@ window.openAddress=()=>{
  previousOpenAddress();
 };
 
-/* AUTH SESSION */
-onAuthStateChanged(auth,async user=>{
- firebaseCustomer=user||null;
+onAuthStateChanged(auth, async (user) => {
 
- // Normal JavaScript functions ke liye global login status
- window.firebaseCustomer=firebaseCustomer;
+  firebaseCustomer = user || null;
+  window.firebaseCustomer = firebaseCustomer;
 
- if(user){
-  try{
-   await saveCustomerProfile(user);
-   await loadCustomerOrders();
-   await loadLiveProducts();
-   setHeader();
-  }catch(error){
-   console.error('Customer account loading error:',error);
-   toast('Account loading failed: '+error.message);
+  if (user) {
+    try {
+      await saveCustomerProfile(user);
+      await loadCustomerOrders();
+      await loadLiveProducts();
+      setHeader();
+
+    } catch (error) {
+      console.error('Customer account loading error:', error);
+      toast('Account loading failed: ' + error.message);
+    }
+
+  } else {
+    state.orders = [];
+    state.cart = [];
+    save();
+    render();
   }
- }else{
-  state.orders=[];
-  state.cart=[];
-  save();
-  render();
- }
-});
 
- if(user){
- try{
- await saveCustomerProfile(user);
- await loadCustomerOrders();
- await loadLiveProducts();
- setHeader();
- }catch(error){
- console.error('Customer account loading error:',error);
- toast('Account loading failed: '+error.message);
- }
- }else{
- state.orders=[];
- state.cart=[];
- save();
- render();
- }
 });
-
 /* INITIAL LOAD */
 loadLiveProducts();
 
