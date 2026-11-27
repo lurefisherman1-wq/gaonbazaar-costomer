@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,42 +11,38 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
 
 <style>
-:root{--green:#166534;--dark:#14532d;--ink:#17211b;--muted:#68756d;--line:#e6ebe7;--canvas:#f6f8f6}
 *{box-sizing:border-box}
-body{font-family:'DM Sans',sans-serif;background:var(--canvas);color:var(--ink)}
-button,input,select,textarea{font:inherit}
-button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #86efac;outline-offset:2px}
-.btn-primary{background:var(--green);color:white;transition:.18s}
-.btn-primary:hover{background:var(--dark)}
-.panel{background:white;border:1px solid var(--line);border-radius:18px}
-.field{width:100%;border:1px solid #dce4de;border-radius:11px;padding:11px 12px;background:white;font-size:13px}
-.field:focus{border-color:#16a34a;outline:3px solid #dcfce7}
+body{font-family:'DM Sans',sans-serif;background:#f6f8f6;color:#17211b}
+.btn-primary{background:#166534;color:white}
+.btn-primary:hover{background:#14532d}
+.panel{background:white;border:1px solid #e6ebe7;border-radius:18px}
+.field{width:100%;border:1px solid #dce4de;border-radius:11px;padding:12px;background:white;font-size:13px}
+.field:focus{outline:2px solid #bbf7d0;border-color:#16a34a}
 .chip{border:1px solid #e1e8e2;background:white;color:#526057}
-.chip.active{background:var(--green);border-color:var(--green);color:white}
-.no-scrollbar::-webkit-scrollbar{display:none}
-.no-scrollbar{scrollbar-width:none}
-.overlay{background:rgba(12,22,15,.52);backdrop-filter:blur(3px)}
+.chip.active{background:#166534;border-color:#166534;color:white}
+.overlay{background:rgba(12,22,15,.55);backdrop-filter:blur(3px)}
+.product-card{transition:.2s}
+.product-card:hover{transform:translateY(-2px)}
 .toast{animation:toastIn .2s ease-out}
 @keyframes toastIn{from{opacity:0;transform:translate(-50%,-8px)}to{opacity:1;transform:translate(-50%,0)}}
-.product-card{transition:.18s}
-.product-card:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(18,45,27,.08)}
+.no-scrollbar::-webkit-scrollbar{display:none}
 @media(min-width:768px){.content-wrap{max-width:1180px}}
 </style>
 </head>
 
 <body class="min-h-screen" data-app="customer">
 
-<header class="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-[#e6ebe7]">
+<header class="sticky top-0 z-30 bg-white border-b">
 <div class="content-wrap mx-auto px-4 lg:px-6">
-<div class="h-[70px] flex items-center justify-between gap-4">
+<div class="h-[70px] flex items-center justify-between gap-3">
 
 <a href="#" onclick="returnToStore();return false" class="flex items-center gap-3">
 <div class="w-11 h-11 rounded-2xl bg-green-800 text-white flex items-center justify-center">
 <i class="fa-solid fa-basket-shopping text-lg"></i>
 </div>
 <div>
-<div class="text-[19px] font-extrabold">Gaon<span class="text-green-700">Bazaar</span></div>
-<div class="text-[10px] text-slate-500 font-semibold tracking-wider uppercase">Customer App</div>
+<div class="text-xl font-extrabold">Gaon<span class="text-green-700">Bazaar</span></div>
+<div class="text-[10px] text-slate-500 font-semibold uppercase">Customer App</div>
 </div>
 </a>
 
@@ -62,8 +57,10 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 <i class="fa-solid fa-bag-shopping"></i>
 <span id="cart-count" class="absolute -top-1 -right-1 min-w-5 h-5 rounded-full bg-green-700 text-white text-[10px] flex items-center justify-center">0</span>
 </button>
+
 <button onclick="openProfile()" class="h-10 px-3 rounded-xl bg-slate-900 text-white text-xs font-bold">
-<i class="fa-regular fa-user mr-1"></i><span id="profile-label">Your account</span>
+<i class="fa-regular fa-user mr-1"></i>
+<span id="profile-label">Your account</span>
 </button>
 </div>
 
@@ -73,7 +70,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 
 <main id="app" class="content-wrap mx-auto px-4 lg:px-6 py-6 pb-28"></main>
 
-<button id="mobile-cart" onclick="openCart()" class="hidden fixed bottom-4 left-4 right-4 z-40 mx-auto max-w-lg md:max-w-md md:left-auto md:right-6 btn-primary rounded-2xl p-3.5 shadow-xl flex items-center justify-between">
+<button id="mobile-cart" onclick="openCart()" class="hidden fixed bottom-4 left-4 right-4 z-40 mx-auto max-w-lg btn-primary rounded-2xl p-3.5 shadow-xl flex items-center justify-between">
 <span>
 <span id="mobile-cart-count" class="block text-[10px] text-green-100 font-bold">0 items</span>
 <span id="mobile-cart-total" class="font-extrabold">₹0</span>
@@ -82,779 +79,1937 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 </button>
 
 <!-- CART -->
-<div id="cart-overlay" class="overlay fixed inset-0 z-40 hidden" onclick="if(event.target===this)closeCart()">
+<div id="cart-overlay" class="overlay fixed inset-0 z-40 hidden">
 <aside class="absolute right-0 top-0 h-full w-full max-w-md bg-[#f7f9f7] flex flex-col">
+
 <div class="bg-white px-5 py-4 border-b flex items-center justify-between">
 <div>
-<h2 class="font-extrabold text-lg">Your cart</h2>
-<p class="text-xs text-slate-500">Review your items before checkout</p>
+<h2 class="font-extrabold text-lg">Your Cart</h2>
+<p class="text-xs text-slate-500">Review your items</p>
 </div>
-<button onclick="closeCart()" class="w-9 h-9 rounded-full bg-slate-100"><i class="fa-solid fa-xmark"></i></button>
+<button onclick="closeCart()" class="w-9 h-9 rounded-full bg-slate-100">
+<i class="fa-solid fa-xmark"></i>
+</button>
 </div>
 
 <div class="p-4 overflow-y-auto flex-1 space-y-4">
+
 <div id="cart-lines" class="panel p-3 space-y-3"></div>
 
 <div class="panel p-4 space-y-3">
-<p class="text-xs font-extrabold uppercase text-slate-500">Order type</p>
+<p class="text-xs font-extrabold uppercase text-slate-500">Order Type</p>
+
 <div class="grid grid-cols-2 gap-2">
 <button id="delivery-option" onclick="setFulfillment('delivery')" class="rounded-xl border-2 border-green-700 bg-green-50 p-3 text-left">
 <i class="fa-solid fa-motorcycle text-green-700"></i>
-<span class="block text-xs font-bold mt-1">Home delivery</span>
+<span class="block text-xs font-bold mt-1">Home Delivery</span>
 </button>
+
 <button id="pickup-option" onclick="setFulfillment('pickup')" class="rounded-xl border p-3 text-left">
 <i class="fa-solid fa-store"></i>
-<span class="block text-xs font-bold mt-1">Store pickup</span>
+<span class="block text-xs font-bold mt-1">Store Pickup</span>
 </button>
 </div>
 
 <div id="delivery-address-wrap">
-<label class="text-xs font-bold block mb-1">Delivery address</label>
+<label class="text-xs font-bold block mb-1">Delivery Address</label>
 <textarea id="checkout-address" class="field" placeholder="House, street, village / locality"></textarea>
 </div>
 
 <div>
-<label class="text-xs font-bold block mb-1">Customer name</label>
+<label class="text-xs font-bold block mb-1">Customer Name</label>
 <input id="checkout-name" class="field" placeholder="Enter your name">
 </div>
 
 <div>
-<label class="text-xs font-bold block mb-1">Mobile number</label>
-<input id="checkout-phone" class="field" maxlength="10" placeholder="10-digit mobile number" disabled>
+<label class="text-xs font-bold block mb-1">Mobile Number</label>
+<input id="checkout-phone" class="field" type="tel" maxlength="10" placeholder="10-digit mobile number">
 </div>
+
 </div>
 
 <div class="panel p-4 space-y-2 text-sm">
-<div class="flex justify-between"><span>Items total</span><span id="subtotal">₹0</span></div>
-<div class="flex justify-between"><span>Delivery fee</span><span id="delivery-fee">₹0</span></div>
+<div class="flex justify-between"><span>Items Total</span><span id="subtotal">₹0</span></div>
+<div class="flex justify-between"><span>Delivery Fee</span><span id="delivery-fee">₹0</span></div>
 <div class="border-t pt-3 flex justify-between font-extrabold text-base">
-<span>Grand total</span><span id="grand-total">₹0</span>
+<span>Grand Total</span><span id="grand-total">₹0</span>
 </div>
 <p class="text-[11px] text-slate-400">Payment: Cash on delivery or pay at store.</p>
 </div>
+
 </div>
 
 <div class="bg-white border-t p-4">
 <button id="place-order-button" onclick="placeOrder()" class="btn-primary w-full rounded-xl py-3.5 font-extrabold flex justify-between px-4">
-<span>Place order</span><span id="place-total">₹0 →</span>
+<span>Place Order</span><span id="place-total">₹0 →</span>
 </button>
 </div>
+
 </aside>
 </div>
 
-<!-- AUTH -->
+<!-- EMAIL PASSWORD LOGIN / SIGNUP -->
 <div id="customer-auth" class="overlay fixed inset-0 z-[70] hidden items-center justify-center p-4">
 <section class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-5">
+
 <div class="flex justify-between items-center mb-4">
 <div>
 <h2 class="text-xl font-extrabold">GaonBazaar Account</h2>
-<p class="text-xs text-slate-500 mt-1">Login with your mobile number</p>
+<p id="auth-subtitle" class="text-xs text-slate-500 mt-1">Sign in to continue shopping</p>
 </div>
-<button onclick="closeCustomerAuth()" class="w-9 h-9 bg-slate-100 rounded-full"><i class="fa-solid fa-xmark"></i></button>
-</div>
-
-<div id="phone-step">
-<label class="text-xs font-bold">Mobile number</label>
-<div class="flex gap-2">
-<span class="bg-slate-100 rounded-xl p-3 text-sm font-bold">+91</span>
-<input id="customer-phone" class="field" type="tel" maxlength="10" placeholder="10-digit mobile number">
-</div>
-<button id="send-otp-button" onclick="sendCustomerOTP()" class="btn-primary w-full rounded-xl p-3 font-bold mt-3">Send OTP</button>
+<button onclick="closeCustomerAuth()" class="w-9 h-9 bg-slate-100 rounded-full">
+<i class="fa-solid fa-xmark"></i>
+</button>
 </div>
 
-<div id="otp-step" class="hidden">
-<label class="text-xs font-bold">Enter OTP</label>
-<input id="customer-otp" class="field text-center tracking-[.4em]" inputmode="numeric" maxlength="6" placeholder="6-digit OTP">
-<button onclick="verifyCustomerOTP()" class="btn-primary w-full rounded-xl p-3 font-bold mt-3">Verify & Login</button>
-<button onclick="backToPhone()" class="w-full text-green-700 text-xs font-bold mt-3">Change mobile number</button>
+<div id="signup-name-wrap" class="hidden mb-3">
+<label class="text-xs font-bold">Full Name</label>
+<input id="customer-name" class="field mt-1" type="text" placeholder="Enter your full name">
 </div>
 
-<div id="recaptcha-container"></div>
+<div class="mb-3">
+<label class="text-xs font-bold">Email Address</label>
+<input id="customer-email" class="field mt-1" type="email" autocomplete="email" placeholder="name@example.com">
+</div>
+
+<div>
+<label class="text-xs font-bold">Password</label>
+<input id="customer-password" class="field mt-1" type="password" autocomplete="current-password" placeholder="At least 6 characters">
+</div>
+
+<button id="auth-submit-button" onclick="submitCustomerAuth()" class="btn-primary w-full rounded-xl p-3 font-bold mt-4">
+Login
+</button>
+
+<p class="text-center text-xs text-slate-500 mt-4">
+<span id="auth-switch-label">New to GaonBazaar?</span>
+<button id="auth-switch-button" onclick="toggleCustomerAuthMode()" class="text-green-700 font-extrabold">Create Account</button>
+</p>
+
 <p id="customer-auth-message" class="text-xs text-center mt-4 text-red-600"></p>
+
 </section>
 </div>
 
-<!-- MODAL -->
-<div id="modal-overlay" class="overlay fixed inset-0 z-50 hidden items-center justify-center p-4" onclick="if(event.target===this)closeModal()">
+<!-- GENERAL MODAL -->
+<div id="modal-overlay" class="overlay fixed inset-0 z-50 hidden items-center justify-center p-4">
 <section class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-5">
 <div class="flex justify-between items-center mb-4">
 <h3 id="modal-title" class="font-extrabold text-lg">Details</h3>
-<button onclick="closeModal()" class="w-8 h-8 rounded-full bg-slate-100"><i class="fa-solid fa-xmark"></i></button>
+<button onclick="closeModal()" class="w-8 h-8 rounded-full bg-slate-100">
+<i class="fa-solid fa-xmark"></i>
+</button>
 </div>
 <div id="modal-content"></div>
 </section>
 </div>
 
 <div id="toast" class="hidden toast fixed top-20 left-1/2 -translate-x-1/2 z-[80] bg-slate-900 text-white text-xs font-semibold px-4 py-3 rounded-xl shadow-xl max-w-[90vw] text-center"></div>
-
 <script>
 'use strict';
 
-const STORAGE_KEY='gaonbazaar_professional_v1';
- window.firebaseCustomer = null;
+const STORAGE_KEY = 'gaonbazaar_professional_v1';
 
-let state={
- products:[],
- cart:[],
- orders:[],
- profile:{name:'',phone:''},
- address:'',
- category:'All',
- search:'',
- fulfillment:'delivery'
+window.firebaseCustomer = null;
+
+let state = {
+    products: [],
+    cart: [],
+    orders: [],
+    profile: {
+        name: '',
+        phone: '',
+        email: ''
+    },
+    address: '',
+    category: 'All',
+    search: '',
+    fulfillment: 'delivery'
 };
 
-function loadLocal(){
- try{
- const s=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');
- if(s&&typeof s==='object'){
- state={...state,...s};
- state.cart=Array.isArray(s.cart)?s.cart:[];
- state.orders=[];
- state.products=[];
- }
- }catch(e){}
-}
-function save(){
- localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
-}
-function money(n){
- return '₹'+Number(n||0).toLocaleString('en-IN',{maximumFractionDigits:2});
-}
-function esc(v){
- return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-function toast(msg){
- const el=document.getElementById('toast');
- el.textContent=msg;
- el.classList.remove('hidden');
- clearTimeout(toast.timer);
- toast.timer=setTimeout(()=>el.classList.add('hidden'),3000);
-}
-function setHeader(){
- document.getElementById('header-address').textContent=state.address||'Add your delivery address';
- document.getElementById('profile-label').textContent=state.profile.name||'Your account';
- const count=state.cart.reduce((s,x)=>s+x.qty,0);
- document.getElementById('cart-count').textContent=count;
- document.getElementById('mobile-cart-count').textContent=count+' item'+(count===1?'':'s');
- document.getElementById('mobile-cart-total').textContent=money(cartTotal());
- document.getElementById('mobile-cart').classList.toggle('hidden',count===0);
-}
-function render(){
- setHeader();
- renderCustomer();
-}
-function renderCustomer(){
- const categories=['All','Grocery','Vegetables','Dairy'];
- const term=state.search.toLowerCase();
- const products=state.products.filter(p=>p.active&&p.stock>0&&(state.category==='All'||p.category===state.category)&&(`${p.name} ${p.localName||''} ${p.shop}`).toLowerCase().includes(term));
+/* LOAD LOCAL DATA */
 
- const activeOrders=state.orders.filter(o=>!['Delivered','Cancelled'].includes(o.status));
+function loadLocal() {
+    try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
 
- document.getElementById('app').innerHTML=`
- <section class="rounded-3xl bg-gradient-to-r from-green-900 to-green-700 text-white p-6 md:p-8 mb-6 relative overflow-hidden">
- <div class="relative z-10 max-w-2xl">
- <span class="bg-white/15 rounded-full px-3 py-1 text-[10px] font-bold uppercase">Shop local. Shop easy.</span>
- <h1 class="text-2xl md:text-3xl font-extrabold mt-3">Everyday essentials,<br> from stores around you.</h1>
- <p class="text-sm text-green-100 mt-2">Discover groceries, fresh vegetables and dairy products from your neighbourhood shops.</p>
- <button onclick="openAddress()" class="mt-5 bg-white text-green-900 rounded-xl px-4 py-2.5 text-xs font-extrabold">Add delivery address</button>
- </div>
- <div class="absolute -right-8 -bottom-12 text-[170px] opacity-10">🛍️</div>
- </section>
+        if (saved && typeof saved === 'object') {
+            state = {
+                ...state,
+                ...saved
+            };
 
- <section class="panel p-4 mb-6 flex items-center justify-between gap-3">
- <div><h2 class="font-extrabold">My Orders</h2><p class="text-xs text-slate-500 mt-1">Track your purchases and order history.</p></div>
- <button onclick="renderMyOrders()" class="btn-primary rounded-xl px-4 py-3 text-xs font-bold">View Orders →</button>
- </section>
+            state.cart = Array.isArray(saved.cart) ? saved.cart : [];
+            state.products = [];
+            state.orders = [];
 
- ${activeOrders.length?`<section class="mb-6"><h2 class="font-extrabold mb-3">Your active orders</h2><div class="grid md:grid-cols-2 gap-3">${activeOrders.map(orderCard).join('')}</div></section>`:''}
-
- <section class="flex flex-col sm:flex-row justify-between gap-3 mb-4">
- <div><p class="text-xs font-bold text-green-700 uppercase">Local marketplace</p><h2 class="text-xl font-extrabold mt-1">Shop essentials</h2></div>
- <input id="product-search" class="field sm:max-w-xs" placeholder="Search products or stores..." value="${esc(state.search)}" oninput="setSearch(this.value)">
- </section>
-
- <div class="flex gap-2 overflow-x-auto no-scrollbar pb-3 mb-2">
- ${categories.map(c=>`<button onclick="setCategory('${c}')" class="chip ${state.category===c?'active':''} rounded-full px-4 py-2 text-xs font-bold">${c}</button>`).join('')}
- </div>
-
- ${products.length?`<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">${products.map(productCard).join('')}</div>`:`<div class="panel p-10 text-center"><div class="text-4xl mb-3">🔎</div><h3 class="font-extrabold">No products found</h3><p class="text-sm text-slate-500 mt-1">${state.products.length?'Try another search or category.':'Products will appear here when shops publish their catalogue.'}</p></div>`}
- `;
-}
-function productCard(p){
- const item=state.cart.find(x=>x.id===p.id);
- return `<article class="product-card panel p-3 flex flex-col min-w-0">
- <div class="h-28 rounded-xl bg-[#f3f7f3] flex items-center justify-center text-5xl">${esc(p.emoji||'📦')}</div>
- <div class="mt-3 flex-1"><p class="text-[10px] text-slate-500 truncate">${esc(p.shop)}</p><h3 class="font-extrabold text-sm mt-1">${esc(p.name)}</h3><p class="text-[11px] text-slate-500">${esc(p.weight)}</p></div>
- <div class="flex items-center justify-between gap-2 mt-3"><b>${money(p.price)}</b>
- ${item?`<div class="flex items-center gap-2 bg-green-700 text-white rounded-lg px-2 py-1"><button onclick="changeCart('${p.id}',-1)">−</button><b>${item.qty}</b><button onclick="changeCart('${p.id}',1)">+</button></div>`:`<button onclick="changeCart('${p.id}',1)" class="border border-green-700 text-green-800 rounded-lg px-3 py-1.5 text-xs font-extrabold">ADD</button>`}
- </div></article>`;
-}
-function setCategory(c){state.category=c;save();renderCustomer();}
-function setSearch(v){
- state.search=v;
- save();
- const pos=document.getElementById('product-search')?.selectionStart;
- renderCustomer();
- const input=document.getElementById('product-search');
- input?.focus();
- if(pos!==undefined)input?.setSelectionRange(pos,pos);
-}
-function cartItems(){
- return state.cart.map(c=>{
- const p=state.products.find(x=>x.id===c.id);
- return p?{...p,qty:c.qty}:null;
- }).filter(Boolean);
-}
-function cartTotal(){
- return cartItems().reduce((s,p)=>s+p.price*p.qty,0);
-}
-function changeCart(id,delta){
- const p=state.products.find(x=>x.id===id);
- if(!p)return;
- let item=state.cart.find(x=>x.id===id);
- if(!item&&delta>0){
- if(p.stock<1)return toast('Product out of stock.');
- state.cart.push({id,qty:1});
- }else if(item){
- if(delta>0&&item.qty>=p.stock)return toast('Available stock limit reached.');
- item.qty+=delta;
- if(item.qty<=0)state.cart=state.cart.filter(x=>x.id!==id);
- }
- save();
- render();
- if(!document.getElementById('cart-overlay').classList.contains('hidden'))renderCart();
+            state.profile = {
+                name: '',
+                phone: '',
+                email: '',
+                ...(saved.profile || {})
+            };
+        }
+    } catch (error) {
+        console.error('Local data error:', error);
+    }
 }
 
-function openCart(){
- if(!state.cart.length)return toast('Your cart is empty.');
-
- if(!window.firebaseCustomer){
-   openCustomerAuth();
-   return toast('Login before checkout.');
- }
-
- document.getElementById('checkout-address').value=state.address;
- document.getElementById('checkout-name').value=state.profile.name;
- document.getElementById('checkout-phone').value=state.profile.phone;
- document.getElementById('cart-overlay').classList.remove('hidden');
- renderCart();
+function save() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
-function closeCart(){
- document.getElementById('cart-overlay').classList.add('hidden');
-}
-function setFulfillment(mode){
- state.fulfillment=mode;
- save();
- renderCart();
-}
-function renderCart(){
- const items=cartItems();
- document.getElementById('cart-lines').innerHTML=items.length?items.map(p=>`
- <div class="flex items-center gap-3">
- <div class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-xl">${esc(p.emoji||'📦')}</div>
- <div class="flex-1 min-w-0"><p class="text-xs font-extrabold">${esc(p.name)}</p><p class="text-[11px] text-slate-500">${money(p.price)} × ${p.qty}</p></div>
- <div class="flex items-center gap-2 border rounded-lg px-2 py-1"><button onclick="changeCart('${p.id}',-1)">−</button><b>${p.qty}</b><button onclick="changeCart('${p.id}',1)">+</button></div>
- </div>`).join(''):'<p class="text-center text-sm py-5">Your cart is empty.</p>';
+/* COMMON FUNCTIONS */
 
- const subtotal=cartTotal();
- const fee=state.fulfillment==='pickup'||subtotal>=299?0:20;
- const total=subtotal+fee;
- document.getElementById('subtotal').textContent=money(subtotal);
- document.getElementById('delivery-fee').textContent=fee?money(fee):'Free';
- document.getElementById('grand-total').textContent=money(total);
- document.getElementById('place-total').textContent=money(total)+' →';
- document.getElementById('delivery-address-wrap').classList.toggle('hidden',state.fulfillment==='pickup');
- document.getElementById('delivery-option').className=state.fulfillment==='delivery'?'rounded-xl border-2 border-green-700 bg-green-50 p-3 text-left':'rounded-xl border p-3 text-left';
- document.getElementById('pickup-option').className=state.fulfillment==='pickup'?'rounded-xl border-2 border-green-700 bg-green-50 p-3 text-left':'rounded-xl border p-3 text-left';
-}
-function orderCard(o){
- return `<article class="panel p-4">
- <div class="flex justify-between gap-2"><div><p class="text-xs text-slate-500">Order #${esc(o.id)}</p><p class="font-extrabold text-sm mt-1">${esc(o.status)}</p></div><b class="text-green-700 text-xs">${money(o.total)}</b></div>
- <p class="text-xs text-slate-500 mt-2">${o.mode==='pickup'?'Store pickup':'Home delivery'} · ${o.items.length} product(s)</p>
- <button onclick="openOrderDetails('${esc(o.id)}')" class="mt-3 text-xs font-extrabold text-green-700">View details →</button>
- </article>`;
-}
-function renderMyOrders(){
- const orders=state.orders;
- document.getElementById('app').innerHTML=`
- <button onclick="render()" class="text-xs font-bold text-green-700 mb-4">← Back to shopping</button>
- <h1 class="text-2xl font-extrabold mb-4">My Orders</h1>
- ${orders.length?`<div class="space-y-3">${orders.map(orderCard).join('')}</div>`:`<div class="panel p-10 text-center"><i class="fa-solid fa-bag-shopping text-4xl text-slate-300"></i><h3 class="font-extrabold mt-3">No orders yet</h3><p class="text-sm text-slate-500 mt-1">Your orders will appear here.</p></div>`}`;
-}
-function openOrderDetails(id){
- const o=state.orders.find(x=>x.id===id);
- if(!o)return;
- const steps=['Order Placed','Picking in Progress','Packing Complete',...(o.mode==='delivery'?['Picked Up (Out for Delivery)']:[]),'Delivered'];
- const current=steps.indexOf(o.status);
- openModal('Order Details',`
- <div class="bg-slate-50 rounded-xl p-3 mb-4">
- <p class="text-xs text-slate-500">Order ID</p><b>#${esc(o.id)}</b>
- <p class="font-bold mt-2">${esc(o.status)}</p>
- </div>
- <h4 class="font-extrabold text-sm mb-3">Order tracking</h4>
- <div class="space-y-2 mb-5">${steps.map((s,i)=>`<p class="text-xs ${i<=current?'text-green-700 font-bold':'text-slate-400'}"><i class="fa-solid ${i<=current?'fa-circle-check':'fa-circle'} mr-2"></i>${s}</p>`).join('')}</div>
- <h4 class="font-extrabold text-sm mb-3">Items ordered</h4>
- <div class="space-y-2">${o.items.map(i=>`<div class="flex justify-between text-xs"><span>${esc(i.name)} × ${i.qty}</span><b>${money(i.price*i.qty)}</b></div>`).join('')}</div>
- <div class="border-t mt-4 pt-3 flex justify-between font-extrabold"><span>Grand total</span><span>${money(o.total)}</span></div>
- <p class="text-xs text-slate-500 mt-3">${esc(o.address)}</p>
- `);
-}
-function openModal(title,content){
- document.getElementById('modal-title').textContent=title;
- document.getElementById('modal-content').innerHTML=content;
- document.getElementById('modal-overlay').classList.remove('hidden');
- document.getElementById('modal-overlay').classList.add('flex');
-}
-function closeModal(){
- document.getElementById('modal-overlay').classList.add('hidden');
- document.getElementById('modal-overlay').classList.remove('flex');
-}
-function openAddress(){
- if(!window.firebaseCustomer){
-   openCustomerAuth();
-   return toast('Login first to save your address.');
- }
-
- openModal('Delivery address',`
- <label class="text-xs font-bold block mb-2">Your address</label>
- <textarea id="address-input" class="field min-h-24">${esc(state.address)}</textarea>
- <button onclick="saveAddress()" class="btn-primary w-full rounded-xl py-3 mt-3 font-bold">Save address</button>`);
+function money(value) {
+    return '₹' + Number(value || 0).toLocaleString('en-IN');
 }
 
-function saveAddress(){
- const v=document.getElementById('address-input').value.trim();
- if(!v)return toast('Enter your address.');
- state.address=v;
- save();
- closeModal();
- setHeader();
- toast('Address saved.');
+function esc(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+    }[char]));
 }
-function openProfile(){
- if(!window.firebaseCustomer){
-   openCustomerAuth();
-   return;
- }
 
- openModal('Your account',`
- <p class="text-xs text-green-700 font-bold mb-3">✓ Logged in</p>
- <label class="text-xs font-bold">Full name</label>
- <input id="profile-name" class="field mt-1" value="${esc(state.profile.name)}">
- <label class="text-xs font-bold block mt-3">Mobile number</label>
- <input class="field mt-1" value="${esc(state.profile.phone)}" disabled>
- <button onclick="saveProfile()" class="btn-primary w-full rounded-xl py-3 mt-4 font-bold">Save details</button>
- <button onclick="customerLogout()" class="w-full py-3 text-red-600 font-bold text-sm">Logout</button>`);
+function toast(message) {
+    const element = document.getElementById('toast');
+
+    element.textContent = message;
+    element.classList.remove('hidden');
+
+    clearTimeout(toast.timer);
+
+    toast.timer = setTimeout(() => {
+        element.classList.add('hidden');
+    }, 3000);
 }
-function returnToStore(){render();}
-function init(){loadLocal();render();}
-init();
+
+/* HEADER */
+
+function setHeader() {
+
+    document.getElementById('header-address').textContent =
+        state.address || 'Add your delivery address';
+
+    document.getElementById('profile-label').textContent =
+        state.profile.name || 'Your account';
+
+    const count = state.cart.reduce(
+        (total, item) => total + item.qty,
+        0
+    );
+
+    document.getElementById('cart-count').textContent = count;
+
+    document.getElementById('mobile-cart-count').textContent =
+        count + ' item' + (count === 1 ? '' : 's');
+
+    document.getElementById('mobile-cart-total').textContent =
+        money(cartTotal());
+
+    document.getElementById('mobile-cart').classList.toggle(
+        'hidden',
+        count === 0
+    );
+}
+
+/* MAIN RENDER */
+
+function render() {
+    setHeader();
+    renderCustomer();
+}
+
+function renderCustomer() {
+
+    const categories = [
+        'All',
+        'Grocery',
+        'Vegetables',
+        'Dairy'
+    ];
+
+    const term = state.search.toLowerCase();
+
+    const products = state.products.filter(product => {
+
+        const categoryMatch =
+            state.category === 'All' ||
+            product.category === state.category;
+
+        const searchText =
+            `${product.name} ${product.localName || ''} ${product.shop}`.toLowerCase();
+
+        return (
+            product.active &&
+            product.stock > 0 &&
+            categoryMatch &&
+            searchText.includes(term)
+        );
+    });
+
+    const activeOrders = state.orders.filter(order =>
+        !['Delivered', 'Cancelled'].includes(order.status)
+    );
+
+    document.getElementById('app').innerHTML = `
+
+        <section class="rounded-3xl bg-gradient-to-r from-green-900 to-green-700 text-white p-6 md:p-8 mb-6">
+
+            <span class="bg-white/15 rounded-full px-3 py-1 text-[10px] font-bold uppercase">
+                Shop Local. Shop Easy.
+            </span>
+
+            <h1 class="text-2xl md:text-3xl font-extrabold mt-3">
+                Everyday essentials,<br>
+                from stores around you.
+            </h1>
+
+            <p class="text-sm text-green-100 mt-2">
+                Discover groceries, fresh vegetables and dairy products from your neighbourhood shops.
+            </p>
+
+            <button onclick="openAddress()" class="mt-5 bg-white text-green-900 rounded-xl px-4 py-2.5 text-xs font-extrabold">
+                Add Delivery Address
+            </button>
+
+        </section>
+
+        <section class="panel p-4 mb-6 flex items-center justify-between gap-3">
+
+            <div>
+                <h2 class="font-extrabold">My Orders</h2>
+                <p class="text-xs text-slate-500 mt-1">
+                    Track your purchases and order history.
+                </p>
+            </div>
+
+            <button onclick="renderMyOrders()" class="btn-primary rounded-xl px-4 py-3 text-xs font-bold">
+                View Orders →
+            </button>
+
+        </section>
+
+        ${activeOrders.length ? `
+
+            <section class="mb-6">
+
+                <h2 class="font-extrabold mb-3">
+                    Your Active Orders
+                </h2>
+
+                <div class="grid md:grid-cols-2 gap-3">
+                    ${activeOrders.map(orderCard).join('')}
+                </div>
+
+            </section>
+
+        ` : ''}
+
+        <section class="flex flex-col sm:flex-row justify-between gap-3 mb-4">
+
+            <div>
+                <p class="text-xs font-bold text-green-700 uppercase">
+                    Local Marketplace
+                </p>
+
+                <h2 class="text-xl font-extrabold mt-1">
+                    Shop Essentials
+                </h2>
+            </div>
+
+            <input
+                id="product-search"
+                class="field sm:max-w-xs"
+                placeholder="Search products or stores..."
+                value="${esc(state.search)}"
+                oninput="setSearch(this.value)"
+            >
+
+        </section>
+
+        <div class="flex gap-2 overflow-x-auto no-scrollbar pb-3 mb-2">
+
+            ${categories.map(category => `
+
+                <button
+                    onclick="setCategory('${category}')"
+                    class="chip ${state.category === category ? 'active' : ''} rounded-full px-4 py-2 text-xs font-bold"
+                >
+                    ${category}
+                </button>
+
+            `).join('')}
+
+        </div>
+
+        ${products.length ? `
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+
+                ${products.map(productCard).join('')}
+
+            </div>
+
+        ` : `
+
+            <div class="panel p-10 text-center">
+
+                <div class="text-4xl mb-3">🔎</div>
+
+                <h3 class="font-extrabold">
+                    No Products Found
+                </h3>
+
+                <p class="text-sm text-slate-500 mt-1">
+                    ${state.products.length
+                        ? 'Try another search or category.'
+                        : 'Products will appear here when shops publish their catalogue.'}
+                </p>
+
+            </div>
+
+        `}
+
+    `;
+}
+
+/* PRODUCT CARD */
+
+function productCard(product) {
+
+    const cartItem = state.cart.find(
+        item => item.id === product.id
+    );
+
+    return `
+
+        <article class="product-card panel p-3 flex flex-col min-w-0">
+
+            <div class="h-28 rounded-xl bg-[#f3f7f3] flex items-center justify-center text-5xl">
+                ${esc(product.emoji || '📦')}
+            </div>
+
+            <div class="mt-3 flex-1">
+
+                <p class="text-[10px] text-slate-500 truncate">
+                    ${esc(product.shop)}
+                </p>
+
+                <h3 class="font-extrabold text-sm mt-1">
+                    ${esc(product.name)}
+                </h3>
+
+                <p class="text-[11px] text-slate-500">
+                    ${esc(product.weight)}
+                </p>
+
+            </div>
+
+            <div class="flex items-center justify-between gap-2 mt-3">
+
+                <b>${money(product.price)}</b>
+
+                ${cartItem ? `
+
+                    <div class="flex items-center gap-2 bg-green-700 text-white rounded-lg px-2 py-1">
+
+                        <button onclick="changeCart('${product.id}', -1)">−</button>
+
+                        <b>${cartItem.qty}</b>
+
+                        <button onclick="changeCart('${product.id}', 1)">+</button>
+
+                    </div>
+
+                ` : `
+
+                    <button
+                        onclick="changeCart('${product.id}', 1)"
+                        class="border border-green-700 text-green-800 rounded-lg px-3 py-1.5 text-xs font-extrabold"
+                    >
+                        ADD
+                    </button>
+
+                `}
+
+            </div>
+
+        </article>
+
+    `;
+}
+
+/* SEARCH AND CATEGORY */
+
+function setCategory(category) {
+    state.category = category;
+    save();
+    renderCustomer();
+}
+
+function setSearch(value) {
+
+    state.search = value;
+
+    save();
+
+    const position =
+        document.getElementById('product-search')?.selectionStart;
+
+    renderCustomer();
+
+    const input = document.getElementById('product-search');
+
+    input?.focus();
+
+    if (position !== undefined) {
+        input?.setSelectionRange(position, position);
+    }
+}
+
+/* CART */
+
+function cartItems() {
+
+    return state.cart.map(cartItem => {
+
+        const product = state.products.find(
+            item => item.id === cartItem.id
+        );
+
+        return product
+            ? { ...product, qty: cartItem.qty }
+            : null;
+
+    }).filter(Boolean);
+}
+
+function cartTotal() {
+
+    return cartItems().reduce(
+        (total, product) =>
+            total + product.price * product.qty,
+        0
+    );
+}
+
+function changeCart(id, delta) {
+
+    const product = state.products.find(
+        item => item.id === id
+    );
+
+    if (!product) return;
+
+    let item = state.cart.find(
+        cartItem => cartItem.id === id
+    );
+
+    if (!item && delta > 0) {
+
+        if (product.stock < 1) {
+            return toast('Product out of stock.');
+        }
+
+        state.cart.push({
+            id,
+            qty: 1
+        });
+
+    } else if (item) {
+
+        if (delta > 0 && item.qty >= product.stock) {
+            return toast('Available stock limit reached.');
+        }
+
+        item.qty += delta;
+
+        if (item.qty <= 0) {
+            state.cart = state.cart.filter(
+                cartItem => cartItem.id !== id
+            );
+        }
+    }
+
+    save();
+    render();
+
+    if (!document.getElementById('cart-overlay').classList.contains('hidden')) {
+        renderCart();
+    }
+}
+
+function openCart() {
+
+    if (!state.cart.length) {
+        return toast('Your cart is empty.');
+    }
+
+    if (!window.firebaseCustomer) {
+        openCustomerAuth();
+        return toast('Login before checkout.');
+    }
+
+    document.getElementById('checkout-address').value =
+        state.address;
+
+    document.getElementById('checkout-name').value =
+        state.profile.name;
+
+    document.getElementById('checkout-phone').value =
+        state.profile.phone || '';
+
+    document.getElementById('cart-overlay').classList.remove('hidden');
+
+    renderCart();
+}
+
+function closeCart() {
+    document.getElementById('cart-overlay').classList.add('hidden');
+}
+
+function setFulfillment(mode) {
+
+    state.fulfillment = mode;
+
+    save();
+
+    renderCart();
+}
+
+function renderCart() {
+
+    const items = cartItems();
+
+    document.getElementById('cart-lines').innerHTML = items.length
+        ? items.map(product => `
+
+            <div class="flex items-center gap-3">
+
+                <div class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-xl">
+                    ${esc(product.emoji || '📦')}
+                </div>
+
+                <div class="flex-1 min-w-0">
+
+                    <p class="text-xs font-extrabold">
+                        ${esc(product.name)}
+                    </p>
+
+                    <p class="text-[11px] text-slate-500">
+                        ${money(product.price)} × ${product.qty}
+                    </p>
+
+                </div>
+
+                <div class="flex items-center gap-2 border rounded-lg px-2 py-1">
+
+                    <button onclick="changeCart('${product.id}', -1)">−</button>
+
+                    <b>${product.qty}</b>
+
+                    <button onclick="changeCart('${product.id}', 1)">+</button>
+
+                </div>
+
+            </div>
+
+        `).join('')
+
+        : '<p class="text-center text-sm py-5">Your cart is empty.</p>';
+
+    const subtotal = cartTotal();
+
+    const fee =
+        state.fulfillment === 'pickup' || subtotal >= 299
+            ? 0
+            : 20;
+
+    const total = subtotal + fee;
+
+    document.getElementById('subtotal').textContent = money(subtotal);
+    document.getElementById('delivery-fee').textContent =
+        fee ? money(fee) : 'Free';
+
+    document.getElementById('grand-total').textContent = money(total);
+    document.getElementById('place-total').textContent = money(total) + ' →';
+
+    document.getElementById('delivery-address-wrap').classList.toggle(
+        'hidden',
+        state.fulfillment === 'pickup'
+    );
+
+    document.getElementById('delivery-option').className =
+        state.fulfillment === 'delivery'
+            ? 'rounded-xl border-2 border-green-700 bg-green-50 p-3 text-left'
+            : 'rounded-xl border p-3 text-left';
+
+    document.getElementById('pickup-option').className =
+        state.fulfillment === 'pickup'
+            ? 'rounded-xl border-2 border-green-700 bg-green-50 p-3 text-left'
+            : 'rounded-xl border p-3 text-left';
+}
+
+/* ORDERS */
+
+function orderCard(order) {
+
+    return `
+
+        <article class="panel p-4">
+
+            <div class="flex justify-between gap-2">
+
+                <div>
+
+                    <p class="text-xs text-slate-500">
+                        Order #${esc(order.id)}
+                    </p>
+
+                    <p class="font-extrabold text-sm mt-1">
+                        ${esc(order.status)}
+                    </p>
+
+                </div>
+
+                <b class="text-green-700 text-xs">
+                    ${money(order.total)}
+                </b>
+
+            </div>
+
+            <p class="text-xs text-slate-500 mt-2">
+                ${order.mode === 'pickup' ? 'Store Pickup' : 'Home Delivery'}
+                · ${order.items.length} product(s)
+            </p>
+
+            <button
+                onclick="openOrderDetails('${esc(order.id)}')"
+                class="mt-3 text-xs font-extrabold text-green-700"
+            >
+                View Details →
+            </button>
+
+        </article>
+
+    `;
+}
+
+function renderMyOrders() {
+
+    const orders = state.orders;
+
+    document.getElementById('app').innerHTML = `
+
+        <button onclick="render()" class="text-xs font-bold text-green-700 mb-4">
+            ← Back to Shopping
+        </button>
+
+        <h1 class="text-2xl font-extrabold mb-4">
+            My Orders
+        </h1>
+
+        ${orders.length ? `
+
+            <div class="space-y-3">
+                ${orders.map(orderCard).join('')}
+            </div>
+
+        ` : `
+
+            <div class="panel p-10 text-center">
+
+                <i class="fa-solid fa-bag-shopping text-4xl text-slate-300"></i>
+
+                <h3 class="font-extrabold mt-3">
+                    No Orders Yet
+                </h3>
+
+                <p class="text-sm text-slate-500 mt-1">
+                    Your orders will appear here.
+                </p>
+
+            </div>
+
+        `}
+
+    `;
+}
+
+function openOrderDetails(id) {
+
+    const order = state.orders.find(
+        item => item.id === id
+    );
+
+    if (!order) return;
+
+    const steps = [
+        'Order Placed',
+        'Picking in Progress',
+        'Packing Complete',
+        ...(order.mode === 'delivery'
+            ? ['Picked Up (Out for Delivery)']
+            : []),
+        'Delivered'
+    ];
+
+    const current = steps.indexOf(order.status);
+
+    openModal('Order Details', `
+
+        <div class="bg-slate-50 rounded-xl p-3 mb-4">
+
+            <p class="text-xs text-slate-500">Order ID</p>
+
+            <b>#${esc(order.id)}</b>
+
+            <p class="font-bold mt-2">
+                ${esc(order.status)}
+            </p>
+
+        </div>
+
+        <h4 class="font-extrabold text-sm mb-3">
+            Order Tracking
+        </h4>
+
+        <div class="space-y-2 mb-5">
+
+            ${steps.map((step, index) => `
+
+                <p class="text-xs ${
+                    index <= current
+                        ? 'text-green-700 font-bold'
+                        : 'text-slate-400'
+                }">
+
+                    <i class="fa-solid ${
+                        index <= current
+                            ? 'fa-circle-check'
+                            : 'fa-circle'
+                    } mr-2"></i>
+
+                    ${step}
+
+                </p>
+
+            `).join('')}
+
+        </div>
+
+        <h4 class="font-extrabold text-sm mb-3">
+            Items Ordered
+        </h4>
+
+        <div class="space-y-2">
+
+            ${order.items.map(item => `
+
+                <div class="flex justify-between text-xs">
+
+                    <span>${esc(item.name)} × ${item.qty}</span>
+
+                    <b>${money(item.price * item.qty)}</b>
+
+                </div>
+
+            `).join('')}
+
+        </div>
+
+        <div class="border-t mt-4 pt-3 flex justify-between font-extrabold">
+
+            <span>Grand Total</span>
+
+            <span>${money(order.total)}</span>
+
+        </div>
+
+        <p class="text-xs text-slate-500 mt-3">
+            ${esc(order.address)}
+        </p>
+
+    `);
+}
+
+/* MODAL */
+
+function openModal(title, content) {
+
+    document.getElementById('modal-title').textContent = title;
+
+    document.getElementById('modal-content').innerHTML = content;
+
+    document.getElementById('modal-overlay').classList.remove('hidden');
+
+    document.getElementById('modal-overlay').classList.add('flex');
+}
+
+function closeModal() {
+
+    document.getElementById('modal-overlay').classList.add('hidden');
+
+    document.getElementById('modal-overlay').classList.remove('flex');
+}
+
+/* ADDRESS */
+
+function openAddress() {
+
+    if (!window.firebaseCustomer) {
+        openCustomerAuth();
+        return toast('Login first to save your delivery address.');
+    }
+
+    openModal('Delivery Address', `
+
+        <label class="text-xs font-bold block mb-2">
+            Your Address
+        </label>
+
+        <textarea id="address-input" class="field min-h-24">${esc(state.address)}</textarea>
+
+        <button
+            onclick="saveAddress()"
+            class="btn-primary w-full rounded-xl py-3 mt-3 font-bold"
+        >
+            Save Address
+        </button>
+
+    `);
+}
+
+function saveAddress() {
+
+    const value = document.getElementById('address-input').value.trim();
+
+    if (!value) {
+        return toast('Enter your address.');
+    }
+
+    state.address = value;
+
+    save();
+    closeModal();
+    setHeader();
+
+    toast('Address saved.');
+}
+
+/* PROFILE */
+
+function openProfile() {
+
+    if (!window.firebaseCustomer) {
+        openCustomerAuth();
+        return;
+    }
+
+    openModal('Your Account', `
+
+        <p class="text-xs text-green-700 font-bold mb-3">
+            ✓ Logged In
+        </p>
+
+        <p class="text-xs text-slate-500 mb-3">
+            ${esc(window.firebaseCustomer.email || '')}
+        </p>
+
+        <label class="text-xs font-bold">
+            Full Name
+        </label>
+
+        <input
+            id="profile-name"
+            class="field mt-1"
+            value="${esc(state.profile.name)}"
+        >
+
+        <label class="text-xs font-bold block mt-3">
+            Mobile Number
+        </label>
+
+        <input
+            id="profile-phone"
+            class="field mt-1"
+            type="tel"
+            maxlength="10"
+            value="${esc(state.profile.phone || '')}"
+            placeholder="10-digit mobile number"
+        >
+
+        <button
+            onclick="saveProfile()"
+            class="btn-primary w-full rounded-xl py-3 mt-4 font-bold"
+        >
+            Save Details
+        </button>
+
+        <button
+            onclick="customerLogout()"
+            class="w-full py-3 text-red-600 font-bold text-sm"
+        >
+            Logout
+        </button>
+
+    `);
+}
+
+function returnToStore() {
+    render();
+}
+
+/* INITIAL LOAD */
+
+loadLocal();
+render();
+
 </script>
-
 <script type="module">
-import {initializeApp,getApps,getApp} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
 
 import {
- getAuth,RecaptchaVerifier,signInWithPhoneNumber,
- onAuthStateChanged,signOut
+    initializeApp,
+    getApps,
+    getApp
+} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+
+import {
+    getAuth,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    onAuthStateChanged,
+    signOut,
+    updateProfile
 } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
 
 import {
- getFirestore,doc,getDoc,setDoc,collection,
- getDocs,query,where,runTransaction,serverTimestamp
+    getFirestore,
+    doc,
+    getDoc,
+    setDoc,
+    collection,
+    getDocs,
+    query,
+    where,
+    runTransaction,
+    serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 
+
 /* FIREBASE CONFIG */
-const firebaseConfig={
- apiKey:"AIzaSyCuSO-U8o1QYUSR2Ay-mBb7orjgLj4H448",
- authDomain:"gaonbazaar-297a8.firebaseapp.com",
- projectId:"gaonbazaar-297a8",
- storageBucket:"gaonbazaar-297a8.firebasestorage.app",
- messagingSenderId:"381925642784",
- appId:"1:381925642784:web:72c4acd4ac69c6605a6245"
+
+const firebaseConfig = {
+
+    apiKey: "AIzaSyCuSO-U8o1QYUSR2Ay-mBb7orjgLj4H448",
+
+    authDomain: "gaonbazaar-297a8.firebaseapp.com",
+
+    projectId: "gaonbazaar-297a8",
+
+    storageBucket: "gaonbazaar-297a8.firebasestorage.app",
+
+    messagingSenderId: "381925642784",
+
+    appId: "1:381925642784:web:72c4acd4ac69c6605a6245"
+
 };
 
-/* CUSTOMER APP SEPARATE FIREBASE INSTANCE */
-const appName="GaonBazaarCustomer";
-const firebaseApp=getApps().some(a=>a.name===appName)
- ?getApp(appName)
- :initializeApp(firebaseConfig,appName);
 
-const auth=getAuth(firebaseApp);
-const db=getFirestore(firebaseApp);
+/* INITIALIZE FIREBASE */
 
-let firebaseCustomer=null;
- window.firebaseCustomer = null;
-let confirmationResult=null;
-let recaptchaVerifier=null;
-let orderBusy=false;
+const appName = "GaonBazaarCustomer";
 
-/* AUTH UI */
-window.openCustomerAuth=()=>{
- document.getElementById('customer-auth').classList.remove('hidden');
- document.getElementById('customer-auth').classList.add('flex');
-};
-window.closeCustomerAuth=()=>{
- document.getElementById('customer-auth').classList.add('hidden');
- document.getElementById('customer-auth').classList.remove('flex');
-};
-window.backToPhone=()=>{
- document.getElementById('phone-step').classList.remove('hidden');
- document.getElementById('otp-step').classList.add('hidden');
-};
-function authMessage(message,error=true){
- const el=document.getElementById('customer-auth-message');
- el.textContent=message;
- el.className='text-xs text-center mt-4 '+(error?'text-red-600':'text-green-700');
+const firebaseApp = getApps().some(app => app.name === appName)
+    ? getApp(appName)
+    : initializeApp(firebaseConfig, appName);
+
+const auth = getAuth(firebaseApp);
+
+const db = getFirestore(firebaseApp);
+
+let firebaseCustomer = null;
+
+let authMode = 'login';
+
+let orderBusy = false;
+
+
+/* AUTH MESSAGE */
+
+function authMessage(message, isError = true) {
+
+    const element = document.getElementById('customer-auth-message');
+
+    element.textContent = message;
+
+    element.className =
+        'text-xs text-center mt-4 ' +
+        (isError ? 'text-red-600' : 'text-green-700');
+
 }
 
-/* SEND OTP */
-window.sendCustomerOTP=async()=>{
- const phone=document.getElementById('customer-phone').value.trim();
- if(!/^[6-9]\d{9}$/.test(phone))return authMessage('Enter a valid 10-digit Indian mobile number.');
 
- const button=document.getElementById('send-otp-button');
- button.disabled=true;
+/* OPEN LOGIN */
 
- try{
- authMessage('Sending OTP...',false);
+window.openCustomerAuth = function () {
 
- if(!recaptchaVerifier){
- recaptchaVerifier=new RecaptchaVerifier(auth,'recaptcha-container',{size:'invisible'});
- }
+    document.getElementById('customer-auth').classList.remove('hidden');
 
- await recaptchaVerifier.render();
+    document.getElementById('customer-auth').classList.add('flex');
 
- confirmationResult=await signInWithPhoneNumber(auth,'+91'+phone,recaptchaVerifier);
+    authMessage('');
 
- document.getElementById('phone-step').classList.add('hidden');
- document.getElementById('otp-step').classList.remove('hidden');
- authMessage('OTP sent successfully.',false);
-
- }catch(error){
- console.error('OTP error:',error);
- authMessage(error.message||'Could not send OTP.');
- if(recaptchaVerifier){
- try{await recaptchaVerifier.clear();}catch(e){}
- recaptchaVerifier=null;
- }
- }finally{
- button.disabled=false;
- }
 };
 
-/* VERIFY OTP */
-window.verifyCustomerOTP=async()=>{
- const otp=document.getElementById('customer-otp').value.trim();
- if(!/^\d{6}$/.test(otp))return authMessage('Enter the 6-digit OTP.');
- if(!confirmationResult)return authMessage('Please request a new OTP.');
 
- try{
- authMessage('Verifying OTP...',false);
- await confirmationResult.confirm(otp);
- closeCustomerAuth();
- toast('Login successful!');
- }catch(error){
- console.error(error);
- authMessage('OTP verification failed: '+error.message);
- }
+/* CLOSE LOGIN */
+
+window.closeCustomerAuth = function () {
+
+    document.getElementById('customer-auth').classList.add('hidden');
+
+    document.getElementById('customer-auth').classList.remove('flex');
+
 };
 
-/* SAVE CUSTOMER PROFILE */
-async function saveCustomerProfile(user){
- const ref=doc(db,'users',user.uid);
- const snap=await getDoc(ref);
- const old=snap.exists()?snap.data():{};
 
- await setDoc(ref,{
- uid:user.uid,
- phone:user.phoneNumber,
- role:old.role||'customer',
- name:old.name||state.profile.name||'',
- createdAt:old.createdAt||serverTimestamp(),
- updatedAt:serverTimestamp()
- },{merge:true});
+/* LOGIN / SIGNUP SWITCH */
 
- state.profile={
- name:old.name||state.profile.name||'',
- phone:user.phoneNumber.replace('+91','')
- };
- save();
- setHeader();
+window.toggleCustomerAuthMode = function () {
+
+    authMode = authMode === 'login' ? 'signup' : 'login';
+
+    const signup = authMode === 'signup';
+
+    document.getElementById('signup-name-wrap').classList.toggle(
+        'hidden',
+        !signup
+    );
+
+    document.getElementById('auth-subtitle').textContent =
+        signup
+            ? 'Create your customer account'
+            : 'Sign in to continue shopping';
+
+    document.getElementById('auth-submit-button').textContent =
+        signup ? 'Create Account' : 'Login';
+
+    document.getElementById('auth-switch-label').textContent =
+        signup
+            ? 'Already have an account?'
+            : 'New to GaonBazaar?';
+
+    document.getElementById('auth-switch-button').textContent =
+        signup ? 'Login' : 'Create Account';
+
+    document.getElementById('customer-password').setAttribute(
+        'autocomplete',
+        signup ? 'new-password' : 'current-password'
+    );
+
+    authMessage('');
+
+};
+
+
+/* EMAIL PASSWORD AUTHENTICATION */
+
+window.submitCustomerAuth = async function () {
+
+    const email = document
+        .getElementById('customer-email')
+        .value.trim()
+        .toLowerCase();
+
+    const password = document
+        .getElementById('customer-password')
+        .value;
+
+    const name = document
+        .getElementById('customer-name')
+        .value.trim();
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+
+        return authMessage('Enter a valid email address.');
+
+    }
+
+    if (password.length < 6) {
+
+        return authMessage('Password must be at least 6 characters.');
+
+    }
+
+    if (authMode === 'signup' && !name) {
+
+        return authMessage('Enter your full name.');
+
+    }
+
+    const button = document.getElementById('auth-submit-button');
+
+    button.disabled = true;
+
+    button.textContent =
+        authMode === 'signup'
+            ? 'Creating Account...'
+            : 'Logging In...';
+
+    try {
+
+        let credential;
+
+        if (authMode === 'signup') {
+
+            credential = await createUserWithEmailAndPassword(
+                auth,
+                email,
+                password
+            );
+
+            await updateProfile(credential.user, {
+                displayName: name
+            });
+
+            await saveCustomerProfile(credential.user, name);
+
+            toast('Account created successfully!');
+
+        } else {
+
+            credential = await signInWithEmailAndPassword(
+                auth,
+                email,
+                password
+            );
+
+            await saveCustomerProfile(credential.user);
+
+            toast('Login successful!');
+
+        }
+
+        closeCustomerAuth();
+
+    } catch (error) {
+
+        console.error('Customer authentication error:', error);
+
+        const messages = {
+
+            'auth/email-already-in-use':
+                'This email is already registered. Please login.',
+
+            'auth/invalid-email':
+                'The email address is invalid.',
+
+            'auth/weak-password':
+                'Choose a stronger password.',
+
+            'auth/user-not-found':
+                'No account found. Create an account first.',
+
+            'auth/wrong-password':
+                'Incorrect email or password.',
+
+            'auth/invalid-credential':
+                'Incorrect email or password.',
+
+            'auth/too-many-requests':
+                'Too many attempts. Please try again later.',
+
+            'auth/network-request-failed':
+                'Network error. Check your internet connection.'
+
+        };
+
+        authMessage(
+            messages[error.code] || error.message || 'Authentication failed.'
+        );
+
+    } finally {
+
+        button.disabled = false;
+
+        button.textContent =
+            authMode === 'signup'
+                ? 'Create Account'
+                : 'Login';
+
+    }
+
+};
+
+
+/* SAVE CUSTOMER PROFILE IN FIRESTORE */
+
+async function saveCustomerProfile(user, providedName = '') {
+
+    const userRef = doc(db, 'users', user.uid);
+
+    const userSnapshot = await getDoc(userRef);
+
+    const oldData = userSnapshot.exists()
+        ? userSnapshot.data()
+        : {};
+
+    const name =
+        providedName ||
+        user.displayName ||
+        oldData.name ||
+        state.profile.name ||
+        '';
+
+    await setDoc(userRef, {
+
+        uid: user.uid,
+
+        email: user.email || '',
+
+        name: name,
+
+        phone: oldData.phone || state.profile.phone || '',
+
+        role: 'customer',
+
+        createdAt: oldData.createdAt || serverTimestamp(),
+
+        updatedAt: serverTimestamp()
+
+    }, { merge: true });
+
+    state.profile = {
+
+        name: name,
+
+        phone: oldData.phone || state.profile.phone || '',
+
+        email: user.email || ''
+
+    };
+
+    save();
+
+    setHeader();
+
 }
 
-/* PROFILE UPDATE */
-window.saveProfile=async()=>{
- if(!firebaseCustomer)return openCustomerAuth();
 
- const name=document.getElementById('profile-name').value.trim();
- if(!name)return toast('Enter your name.');
+/* UPDATE CUSTOMER PROFILE */
 
- try{
- await setDoc(doc(db,'users',firebaseCustomer.uid),{
- uid:firebaseCustomer.uid,
- name,
- phone:firebaseCustomer.phoneNumber,
- role:'customer',
- updatedAt:serverTimestamp()
- },{merge:true});
+window.saveProfile = async function () {
 
- state.profile={name,phone:firebaseCustomer.phoneNumber.replace('+91','')};
- save();
- closeModal();
- setHeader();
- toast('Profile saved successfully.');
- }catch(error){
- console.error(error);
- toast('Profile save failed: '+error.message);
- }
+    if (!firebaseCustomer) {
+
+        return openCustomerAuth();
+
+    }
+
+    const name = document
+        .getElementById('profile-name')
+        .value.trim();
+
+    const phone = document
+        .getElementById('profile-phone')
+        .value.trim();
+
+    if (!name) {
+
+        return toast('Enter your name.');
+
+    }
+
+    if (phone && !/^[6-9]\d{9}$/.test(phone)) {
+
+        return toast('Enter a valid 10-digit mobile number.');
+
+    }
+
+    try {
+
+        await setDoc(
+            doc(db, 'users', firebaseCustomer.uid),
+            {
+
+                uid: firebaseCustomer.uid,
+
+                email: firebaseCustomer.email || '',
+
+                name: name,
+
+                phone: phone,
+
+                role: 'customer',
+
+                updatedAt: serverTimestamp()
+
+            },
+            { merge: true }
+        );
+
+        state.profile = {
+
+            name: name,
+
+            phone: phone,
+
+            email: firebaseCustomer.email || ''
+
+        };
+
+        save();
+
+        closeModal();
+
+        setHeader();
+
+        toast('Profile saved successfully.');
+
+    } catch (error) {
+
+        console.error(error);
+
+        toast('Profile save failed: ' + error.message);
+
+    }
+
 };
 
-window.customerLogout=async()=>{
- try{
- await signOut(auth);
- closeModal();
- toast('Logged out successfully.');
- }catch(error){toast(error.message);}
+
+/* LOGOUT */
+
+window.customerLogout = async function () {
+
+    try {
+
+        await signOut(auth);
+
+        closeModal();
+
+        toast('Logged out successfully.');
+
+    } catch (error) {
+
+        toast(error.message);
+
+    }
+
 };
 
-/* LOAD PRODUCTS */
-async function loadLiveProducts(){
- try{
- const q=query(collection(db,'products'),where('active','==',true));
- const snap=await getDocs(q);
 
- const products=snap.docs.map(d=>{
- const p=d.data();
- return{
- id:d.id,
- name:p.name||'',
- localName:p.localName||'',
- weight:p.weight||p.unit||'',
- price:Number(p.price||0),
- shop:p.shopName||p.shop||'Local Store',
- shopId:p.shopId||'',
- category:p.category||'Grocery',
- stock:Number(p.stock||0),
- emoji:p.emoji||'📦',
- active:p.active===true
- };
- }).filter(p=>p.shopId&&p.stock>0&&p.price>0);
+/* LOAD PRODUCTS FROM FIRESTORE */
 
- state.products=products;
- state.cart=state.cart.filter(c=>products.some(p=>p.id===c.id&&p.stock>=c.qty));
- save();
- render();
+async function loadLiveProducts() {
 
- }catch(error){
- console.error('Product loading error:',error);
- toast('Could not load products: '+error.message);
- }
+    try {
+
+        const productsQuery = query(
+            collection(db, 'products'),
+            where('active', '==', true)
+        );
+
+        const snapshot = await getDocs(productsQuery);
+
+        const products = snapshot.docs.map(document => {
+
+            const product = document.data();
+
+            return {
+
+                id: document.id,
+
+                name: product.name || '',
+
+                localName: product.localName || '',
+
+                weight: product.weight || product.unit || '',
+
+                price: Number(product.price || 0),
+
+                shop: product.shopName || product.shop || 'Local Store',
+
+                shopId: product.shopId || '',
+
+                category: product.category || 'Grocery',
+
+                stock: Number(product.stock || 0),
+
+                emoji: product.emoji || '📦',
+
+                active: product.active === true
+
+            };
+
+        }).filter(product =>
+
+            product.shopId &&
+            product.stock > 0 &&
+            product.price > 0
+
+        );
+
+        state.products = products;
+
+        state.cart = state.cart.filter(cartItem => {
+
+            const product = products.find(
+                item => item.id === cartItem.id
+            );
+
+            return product && product.stock >= cartItem.qty;
+
+        });
+
+        save();
+
+        render();
+
+    } catch (error) {
+
+        console.error('Product loading error:', error);
+
+        toast('Could not load products: ' + error.message);
+
+    }
+
 }
 
-/* CUSTOMER ORDERS */
-async function loadCustomerOrders(){
- if(!firebaseCustomer){state.orders=[];return;}
 
- try{
- const q=query(collection(db,'orders'),where('customerUid','==',firebaseCustomer.uid));
- const snap=await getDocs(q);
+/* LOAD CUSTOMER ORDERS */
 
- state.orders=snap.docs.map(d=>{
- const o=d.data();
- return{
- id:d.id,
- customerName:o.customerName||'',
- customerPhone:o.customerPhone||'',
- address:o.address||'',
- items:o.items||[],
- subtotal:Number(o.subtotal||0),
- fee:Number(o.deliveryFee||0),
- total:Number(o.total||0),
- mode:o.mode||'delivery',
- status:o.status||'Order Placed',
- createdAt:o.createdAt?.toDate?o.createdAt.toDate().toISOString():new Date().toISOString()
- };
- }).sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+async function loadCustomerOrders() {
 
- save();
- }catch(error){
- console.error('Order loading error:',error);
- toast('Could not load orders: '+error.message);
- }
+    if (!firebaseCustomer) {
+
+        state.orders = [];
+
+        return;
+
+    }
+
+    try {
+
+        const ordersQuery = query(
+            collection(db, 'orders'),
+            where('customerUid', '==', firebaseCustomer.uid)
+        );
+
+        const snapshot = await getDocs(ordersQuery);
+
+        state.orders = snapshot.docs.map(document => {
+
+            const order = document.data();
+
+            return {
+
+                id: document.id,
+
+                customerName: order.customerName || '',
+
+                customerPhone: order.customerPhone || '',
+
+                address: order.address || '',
+
+                items: order.items || [],
+
+                subtotal: Number(order.subtotal || 0),
+
+                fee: Number(order.deliveryFee || 0),
+
+                total: Number(order.total || 0),
+
+                mode: order.mode || 'delivery',
+
+                status: order.status || 'Order Placed',
+
+                createdAt: order.createdAt?.toDate
+                    ? order.createdAt.toDate().toISOString()
+                    : new Date().toISOString()
+
+            };
+
+        }).sort((a, b) =>
+
+            new Date(b.createdAt) - new Date(a.createdAt)
+
+        );
+
+        save();
+
+    } catch (error) {
+
+        console.error('Order loading error:', error);
+
+        toast('Could not load orders: ' + error.message);
+
+    }
+
 }
+
 
 /* PLACE ORDER */
-window.placeOrder=async()=>{
- if(orderBusy)return;
 
- if(!firebaseCustomer){
- closeCart();
- openCustomerAuth();
- return toast('Login with your mobile number before placing an order.');
- }
+window.placeOrder = async function () {
 
- const items=cartItems();
- const name=document.getElementById('checkout-name').value.trim();
- const address=document.getElementById('checkout-address').value.trim();
+    if (orderBusy) return;
 
- if(!items.length)return toast('Your cart is empty.');
- if(!name)return toast('Please enter your name.');
- if(state.fulfillment==='delivery'&&!address)return toast('Please enter your delivery address.');
+    if (!firebaseCustomer) {
 
- for(const item of items){
- if(!item.shopId)return toast('A product has no Shop ID. Please contact the shop.');
- }
+        closeCart();
 
- orderBusy=true;
- const button=document.getElementById('place-order-button');
- button.disabled=true;
- button.textContent='Placing order...';
+        openCustomerAuth();
 
- try{
- const grouped={};
+        return toast('Login before placing an order.');
 
- for(const item of items){
- if(!grouped[item.shopId])grouped[item.shopId]=[];
- grouped[item.shopId].push(item);
- }
-
- const shopIds=Object.keys(grouped);
- const orderRefs=shopIds.map(()=>doc(collection(db,'orders')));
-
- await runTransaction(db,async transaction=>{
- const productRefs=items.map(item=>doc(db,'products',item.id));
- const productSnaps=[];
-
- /* READ ALL PRODUCTS FIRST */
- for(const ref of productRefs){
- productSnaps.push(await transaction.get(ref));
- }
-
- /* VALIDATE STOCK AND SHOP */
- productSnaps.forEach((snap,index)=>{
- if(!snap.exists())throw new Error('A product is no longer available.');
-
- const product=snap.data();
- const item=items[index];
-
- if(product.active!==true||
- Number(product.stock)<item.qty||
- product.shopId!==item.shopId){
- throw new Error('Stock changed. Please review your cart.');
- }
- });
-
- /* UPDATE STOCK */
- productSnaps.forEach((snap,index)=>{
- const product=snap.data();
- const item=items[index];
-
- transaction.update(productRefs[index],{
- stock:Number(product.stock)-item.qty,
- updatedAt:serverTimestamp()
- });
- });
-
- /* CREATE ONE ORDER PER SHOP */
- shopIds.forEach((shopId,index)=>{
- const shopItems=grouped[shopId];
-
- const subtotal=shopItems.reduce((sum,item)=>sum+item.price*item.qty,0);
- const fee=state.fulfillment==='pickup'||subtotal>=299?0:20;
-
- transaction.set(orderRefs[index],{
- checkoutId:crypto.randomUUID(),
- customerUid:firebaseCustomer.uid,
- customerName:name,
- customerPhone:firebaseCustomer.phoneNumber,
- shopId,
- items:shopItems.map(item=>({
- productId:item.id,
- name:item.name,
- weight:item.weight,
- price:item.price,
- qty:item.qty
- })),
- subtotal,
- deliveryFee:fee,
- total:subtotal+fee,
- mode:state.fulfillment,
- address:state.fulfillment==='pickup'?'Store pickup':address,
- status:'Order Placed',
- createdAt:serverTimestamp()
- });
- });
- });
-
- /* SAVE CUSTOMER DETAILS */
- await setDoc(doc(db,'users',firebaseCustomer.uid),{
- uid:firebaseCustomer.uid,
- name,
- phone:firebaseCustomer.phoneNumber,
- role:'customer',
- updatedAt:serverTimestamp()
- },{merge:true});
-
- state.cart=[];
- state.profile={name,phone:firebaseCustomer.phoneNumber.replace('+91','')};
- if(state.fulfillment==='delivery')state.address=address;
- save();
-
- closeCart();
- await loadLiveProducts();
- await loadCustomerOrders();
- render();
- toast('Your order has been placed successfully!');
-
- }catch(error){
- console.error('PLACE ORDER ERROR:',error);
- toast('Order failed: '+error.message);
- }finally{
- orderBusy=false;
- button.disabled=false;
- button.innerHTML='<span>Place order</span><span id="place-total">₹0 →</span>';
- }
-};
-
-/* ADDRESS */
-const previousOpenAddress=window.openAddress;
-window.openAddress=()=>{
- if(!firebaseCustomer){
- openCustomerAuth();
- return toast('Login first to save your delivery address.');
- }
- previousOpenAddress();
-};
-
-onAuthStateChanged(auth, async (user) => {
-
-  firebaseCustomer = user || null;
-  window.firebaseCustomer = firebaseCustomer;
-
-  if (user) {
-    try {
-      await saveCustomerProfile(user);
-      await loadCustomerOrders();
-      await loadLiveProducts();
-      setHeader();
-    } catch (error) {
-      console.error('Customer account loading error:', error);
-      toast('Account loading failed: ' + error.message);
     }
-  } else {
-    state.orders = [];
-    state.cart = [];
-    save();
-    render();
-  }
+
+    const items = cartItems();
+
+    const name = document
+        .getElementById('checkout-name')
+        .value.trim();
+
+    const address = document
+        .getElementById('checkout-address')
+        .value.trim();
+
+    const phone = document
+        .getElementById('checkout-phone')
+        .value.trim();
+
+    if (!items.length) {
+
+        return toast('Your cart is empty.');
+
+    }
+
+    if (!name) {
+
+        return toast('Please enter your name.');
+
+    }
+
+    if (!/^[6-9]\d{9}$/.test(phone)) {
+
+        return toast('Enter a valid 10-digit mobile number.');
+
+    }
+
+    if (state.fulfillment === 'delivery' && !address) {
+
+        return toast('Please enter your delivery address.');
+
+    }
+
+    for (const item of items) {
+
+        if (!item.shopId) {
+
+            return toast('A product has no Shop ID. Please contact the shop.');
+
+        }
+
+    }
+
+    orderBusy = true;
+
+    const button = document.getElementById('place-order-button');
+
+    button.disabled = true;
+
+    button.textContent = 'Placing Order...';
+
+    try {
+
+        /*
+         * GROUP PRODUCTS BY SHOP ID
+         * Har shop ko apna alag order milega.
+         */
+
+        const grouped = {};
+
+        for (const item of items) {
+
+            if (!grouped[item.shopId]) {
+
+                grouped[item.shopId] = [];
+
+            }
+
+            grouped[item.shopId].push(item);
+
+        }
+
+        const shopIds = Object.keys(grouped);
+
+        const orderRefs = shopIds.map(() =>
+            doc(collection(db, 'orders'))
+        );
+
+        /*
+         * FIRESTORE TRANSACTION
+         */
+
+        await runTransaction(db, async transaction => {
+
+            const productRefs = items.map(item =>
+                doc(db, 'products', item.id)
+            );
+
+            const productSnapshots = [];
+
+            /* READ ALL PRODUCTS FIRST */
+
+            for (const ref of productRefs) {
+
+                const snapshot = await transaction.get(ref);
+
+                productSnapshots.push(snapshot);
+
+            }
+
+            /* CHECK STOCK AND SHOP ID */
+
+            productSnapshots.forEach((snapshot, index) => {
+
+                if (!snapshot.exists()) {
+
+                    throw new Error('A product is no longer available.');
+
+                }
+
+                const product = snapshot.data();
+
+                const item = items[index];
+
+                if (
+                    product.active !== true ||
+                    Number(product.stock) < item.qty ||
+                    product.shopId !== item.shopId
+                ) {
+
+                    throw new Error(
+                        'Stock changed. Please review your cart.'
+                    );
+
+                }
+
+            });
+
+            /* UPDATE PRODUCT STOCK */
+
+            productSnapshots.forEach((snapshot, index) => {
+
+                const product = snapshot.data();
+
+                const item = items[index];
+
+                transaction.update(productRefs[index], {
+
+                    stock: Number(product.stock) - item.qty,
+
+                    updatedAt: serverTimestamp()
+
+                });
+
+            });
+
+            /* CREATE SEPARATE ORDER FOR EACH SHOP */
+
+            shopIds.forEach((shopId, index) => {
+
+                const shopItems = grouped[shopId];
+
+                const subtotal = shopItems.reduce(
+                    (total, item) =>
+                        total + item.price * item.qty,
+                    0
+                );
+
+                const fee =
+                    state.fulfillment === 'pickup' || subtotal >= 299
+                        ? 0
+                        : 20;
+
+                transaction.set(orderRefs[index], {
+
+                    checkoutId: crypto.randomUUID(),
+
+                    customerUid: firebaseCustomer.uid,
+
+                    customerName: name,
+
+                    customerPhone: phone,
+
+                    customerEmail: firebaseCustomer.email || '',
+
+                    shopId: shopId,
+
+                    items: shopItems.map(item => ({
+
+                        productId: item.id,
+
+                        name: item.name,
+
+                        weight: item.weight,
+
+                        price: item.price,
+
+                        qty: item.qty
+
+                    })),
+
+                    subtotal: subtotal,
+
+                    deliveryFee: fee,
+
+                    total: subtotal + fee,
+
+                    mode: state.fulfillment,
+
+                    address: state.fulfillment === 'pickup'
+                        ? 'Store pickup'
+                        : address,
+
+                    status: 'Order Placed',
+
+                    createdAt: serverTimestamp()
+
+                });
+
+            });
+
+        });
+
+
+        /* SAVE CUSTOMER INFORMATION */
+
+        await setDoc(
+            doc(db, 'users', firebaseCustomer.uid),
+            {
+
+                uid: firebaseCustomer.uid,
+
+                email: firebaseCustomer.email || '',
+
+                name: name,
+
+                phone: phone,
+
+                role: 'customer',
+
+                address: state.fulfillment === 'delivery'
+                    ? address
+                    : state.address,
+
+                updatedAt: serverTimestamp()
+
+            },
+            { merge: true }
+        );
+
+
+        /* CLEAR CART */
+
+        state.cart = [];
+
+        state.profile = {
+
+            name: name,
+
+            phone: phone,
+
+            email: firebaseCustomer.email || ''
+
+        };
+
+        if (state.fulfillment === 'delivery') {
+
+            state.address = address;
+
+        }
+
+        save();
+
+        closeCart();
+
+        await loadLiveProducts();
+
+        await loadCustomerOrders();
+
+        render();
+
+        toast('Your order has been placed successfully!');
+
+
+    } catch (error) {
+
+        console.error('PLACE ORDER ERROR:', error);
+
+        toast('Order failed: ' + error.message);
+
+    } finally {
+
+        orderBusy = false;
+
+        button.disabled = false;
+
+        button.innerHTML =
+            '<span>Place Order</span><span id="place-total">₹0 →</span>';
+
+    }
+
+};
+
+
+/* FIREBASE LOGIN STATE */
+
+onAuthStateChanged(auth, async user => {
+
+    firebaseCustomer = user || null;
+
+    window.firebaseCustomer = firebaseCustomer;
+
+    if (user) {
+
+        try {
+
+            await saveCustomerProfile(user);
+
+            await loadCustomerOrders();
+
+            await loadLiveProducts();
+
+            setHeader();
+
+        } catch (error) {
+
+            console.error('Customer account loading error:', error);
+
+            toast('Account loading failed: ' + error.message);
+
+        }
+
+    } else {
+
+        state.orders = [];
+
+        save();
+
+        render();
+
+    }
 
 });
 
-/* INITIAL LOAD */
-loadLiveProducts();
-
 </script>
+
 </body>
 </html>
