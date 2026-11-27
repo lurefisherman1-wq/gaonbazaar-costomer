@@ -650,16 +650,11 @@ function openCart() {
         return toast('Your cart is empty.');
     }
 
-    if (!window.firebaseCustomer) {
-        openCustomerAuth();
-        return toast('Login before checkout.');
-    }
-
     document.getElementById('checkout-address').value =
-        state.address;
+        state.address || '';
 
     document.getElementById('checkout-name').value =
-        state.profile.name;
+        state.profile.name || '';
 
     document.getElementById('checkout-phone').value =
         state.profile.phone || '';
@@ -668,7 +663,6 @@ function openCart() {
 
     renderCart();
 }
-
 function closeCart() {
     document.getElementById('cart-overlay').classList.add('hidden');
 }
