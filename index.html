@@ -191,6 +191,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 'use strict';
 
 const STORAGE_KEY='gaonbazaar_professional_v1';
+ window.firebaseCustomer = null;
 
 let state={
  products:[],
@@ -326,7 +327,12 @@ function changeCart(id,delta){
 }
 function openCart(){
  if(!state.cart.length)return toast('Your cart is empty.');
- if(!firebaseCustomer){openCustomerAuth();return toast('Login before checkout.');}
+
+ if(!window.firebaseCustomer){
+   openCustomerAuth();
+   return toast('Login before checkout.');
+ }
+
  document.getElementById('checkout-address').value=state.address;
  document.getElementById('checkout-name').value=state.profile.name;
  document.getElementById('checkout-phone').value=state.profile.phone;
@@ -404,12 +410,17 @@ function closeModal(){
  document.getElementById('modal-overlay').classList.remove('flex');
 }
 function openAddress(){
- if(!firebaseCustomer){openCustomerAuth();return toast('Login first to save your address.');}
+ if(!window.firebaseCustomer){
+   openCustomerAuth();
+   return toast('Login first to save your address.');
+ }
+
  openModal('Delivery address',`
  <label class="text-xs font-bold block mb-2">Your address</label>
  <textarea id="address-input" class="field min-h-24">${esc(state.address)}</textarea>
  <button onclick="saveAddress()" class="btn-primary w-full rounded-xl py-3 mt-3 font-bold">Save address</button>`);
 }
+
 function saveAddress(){
  const v=document.getElementById('address-input').value.trim();
  if(!v)return toast('Enter your address.');
@@ -420,7 +431,11 @@ function saveAddress(){
  toast('Address saved.');
 }
 function openProfile(){
- if(!firebaseCustomer){openCustomerAuth();return;}
+ if(!window.firebaseCustomer){
+   openCustomerAuth();
+   return;
+ }
+
  openModal('Your account',`
  <p class="text-xs text-green-700 font-bold mb-3">✓ Logged in</p>
  <label class="text-xs font-bold">Full name</label>
@@ -813,6 +828,27 @@ window.openAddress=()=>{
 /* AUTH SESSION */
 onAuthStateChanged(auth,async user=>{
  firebaseCustomer=user||null;
+
+ // Normal JavaScript functions ke liye global login status
+ window.firebaseCustomer=firebaseCustomer;
+
+ if(user){
+  try{
+   await saveCustomerProfile(user);
+   await loadCustomerOrders();
+   await loadLiveProducts();
+   setHeader();
+  }catch(error){
+   console.error('Customer account loading error:',error);
+   toast('Account loading failed: '+error.message);
+  }
+ }else{
+  state.orders=[];
+  state.cart=[];
+  save();
+  render();
+ }
+});
 
  if(user){
  try{
