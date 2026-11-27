@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#166534">
+  <title>GaonBazaar | Customer App</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+  <style>
+    :root { --green:#166534; --green-dark:#14532d; --ink:#17211b; --muted:#68756d; --line:#e6ebe7; --canvas:#f6f8f6; }
+    * { box-sizing:border-box; }
+    body { font-family:'DM Sans',sans-serif; background:var(--canvas); color:var(--ink); }
+    button,input,select { font:inherit; }
+    button:focus-visible,input:focus-visible,select:focus-visible { outline:3px solid #86efac; outline-offset:2px; }
+    .btn-primary { background:var(--green); color:#fff; transition:.18s ease; }
+    .btn-primary:hover { background:var(--green-dark); }
+    .panel { background:#fff; border:1px solid var(--line); border-radius:18px; }
+    .field { width:100%; border:1px solid #dce4de; border-radius:11px; padding:11px 12px; background:#fff; color:var(--ink); font-size:13px; }
+    .field:focus { border-color:#16a34a; outline:3px solid #dcfce7; }
+    .nav-btn { border:1px solid transparent; color:#5d6b62; }
+    .nav-btn.active { background:#eaf5ed; color:var(--green); border-color:#d3e9d9; }
+    .chip { border:1px solid #e1e8e2; background:#fff; color:#526057; }
+    .chip.active { background:var(--green); border-color:var(--green); color:#fff; }
+    .no-scrollbar::-webkit-scrollbar { display:none; }
+    .no-scrollbar { scrollbar-width:none; }
+    .overlay { background:rgba(12,22,15,.52); backdrop-filter:blur(3px); }
+    .toast { animation:toastIn .2s ease-out; }
+    @keyframes toastIn { from { opacity:0; transform:translate(-50%,-8px); } to { opacity:1; transform:translate(-50%,0); } }
+    .product-card { transition:transform .18s ease, box-shadow .18s ease; }
+    .product-card:hover { transform:translateY(-2px); box-shadow:0 12px 28px rgba(18,45,27,.08); }
+    @media (min-width:768px) { .content-wrap { max-width:1180px; } }
+  </style>
+</head>
+<body class="min-h-screen" data-app="customer">
+  <header class="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-[#e6ebe7]">
+    <div class="content-wrap mx-auto px-4 lg:px-6">
+      <div class="h-[70px] flex items-center justify-between gap-4">
+        <a href="#" class="flex items-center gap-3 min-w-0" onclick="returnToStore()">
+          <div class="w-11 h-11 rounded-2xl bg-green-800 text-white flex items-center justify-center shadow-sm"><i class="fa-solid fa-basket-shopping text-lg"></i></div>
+          <div class="min-w-0">
+            <div class="text-[19px] font-extrabold tracking-tight leading-5">Gaon<span class="text-green-700">Bazaar</span></div>
+            <div class="text-[10px] text-slate-500 font-semibold tracking-[.13em] uppercase mt-1">Customer App</div>
+          </div>
+        </a>
+        <div class="hidden md:flex items-center gap-2 text-xs text-slate-500">
+          <i class="fa-solid fa-location-dot text-green-700"></i>
+          <span id="header-address" class="max-w-[230px] truncate">Add your delivery address</span>
+          <button onclick="openAddress()" class="text-green-700 font-bold hover:underline">Change</button>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="openCart()" class="relative w-10 h-10 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700" aria-label="Open cart">
+            <i class="fa-solid fa-bag-shopping"></i><span id="cart-count" class="absolute -top-1.5 -right-1.5 min-w-5 h-5 px-1 rounded-full bg-green-700 text-white text-[10px] font-bold flex items-center justify-center">0</span>
+          </button>
+          <button onclick="openProfile()" class="h-10 px-3 rounded-xl bg-slate-900 text-white text-xs font-bold flex items-center gap-2"><i class="fa-regular fa-user"></i><span id="profile-label" class="hidden sm:inline">Your account</span></button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="app" class="content-wrap mx-auto px-4 lg:px-6 py-6 pb-28"></main>
+
+  <button id="mobile-cart" onclick="openCart()"
+ class="hidden fixed bottom-4 left-4 right-4 z-40 mx-auto max-w-lg md:max-w-md md:left-auto md:right-6 btn-primary rounded-2xl p-3.5 shadow-xl flex items-center justify-between">
+
+  <span class="flex items-center gap-3">
+    <span class="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center">
+      <i class="fa-solid fa-bag-shopping"></i>
+    </span>
+    <span class="text-left">
+      <span id="mobile-cart-count" class="block text-[10px] text-green-100 font-bold uppercase">0 items</span>
+      <span id="mobile-cart-total" class="font-extrabold">₹0</span>
+    </span>
+  </span>
+
+  <span class="font-bold text-sm">
+    Go to Cart <i class="fa-solid fa-arrow-right ml-1"></i>
+  </span>
+</button>
+
+  <!-- Cart drawer -->
+  <div id="cart-overlay" class="overlay fixed inset-0 z-40 hidden" onclick="if(event.target===this)closeCart()">
+    <aside class="absolute right-0 top-0 h-full w-full max-w-md bg-[#f7f9f7] flex flex-col shadow-2xl">
+      <div class="bg-white px-5 py-4 border-b border-slate-200 flex items-center justify-between">
+        <div><h2 class="font-extrabold text-lg">Your cart</h2><p class="text-xs text-slate-500">Review your items before checkout</p></div>
+        <button onclick="closeCart()" class="w-9 h-9 rounded-full bg-slate-100 text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-4 overflow-y-auto flex-1 space-y-4">
+        <div id="cart-lines" class="panel p-3 space-y-3"></div>
+        <div class="panel p-4 space-y-3">
+          <div class="text-xs font-extrabold uppercase tracking-wide text-slate-500">Order type</div>
+          <div class="grid grid-cols-2 gap-2">
+            <button id="delivery-option" onclick="setFulfillment('delivery')" class="rounded-xl border-2 border-green-700 bg-green-50 p-3 text-left"><i class="fa-solid fa-motorcycle text-green-700"></i><span class="block text-xs font-bold mt-1">Home delivery</span></button>
+            <button id="pickup-option" onclick="setFulfillment('pickup')" class="rounded-xl border border-slate-200 p-3 text-left"><i class="fa-solid fa-store text-slate-500"></i><span class="block text-xs font-bold mt-1">Store pickup</span></button>
+          </div>
+          <div id="delivery-address-wrap"><label class="text-xs font-bold text-slate-600 block mb-1.5">Delivery address</label><input id="checkout-address" class="field" placeholder="House, street, village / locality"></div>
+          <div><label class="text-xs font-bold text-slate-600 block mb-1.5">Customer name</label><input id="checkout-name" class="field" placeholder="Enter your name"></div>
+          <div><label class="text-xs font-bold text-slate-600 block mb-1.5">Mobile number</label><input id="checkout-phone" class="field" type="tel" maxlength="10" placeholder="10-digit mobile number"></div>
+        </div>
+        <div class="panel p-4 space-y-2 text-sm">
+          <div class="flex justify-between text-slate-600"><span>Items total</span><span id="subtotal">₹0</span></div>
+          <div class="flex justify-between text-slate-600"><span>Delivery fee</span><span id="delivery-fee">₹0</span></div>
+          <div class="border-t border-dashed pt-3 flex justify-between font-extrabold text-base"><span>Grand total</span><span id="grand-total">₹0</span></div>
+          <p class="text-[11px] text-slate-400">Payment: Cash on delivery or pay at store. Online payment is not enabled.</p>
+        </div>
+      </div>
+      <div class="bg-white border-t p-4"><button onclick="placeOrder()" class="btn-primary w-full rounded-xl py-3.5 font-extrabold flex justify-between px-4"><span>Place order</span><span id="place-total">₹0 <i class="fa-solid fa-arrow-right ml-2"></i></span></button></div>
+    </aside>
+  </div>
+
+<!-- Firebase Customer Login -->
+<div id="customer-auth" class="overlay fixed inset-0 z-[70] hidden items-center justify-center p-4">
+  <section class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-5">
+    <div class="flex justify-between items-center mb-4">
+      <div>
+        <h2 class="text-xl font-extrabold">GaonBazaar Account</h2>
+        <p class="text-xs text-slate-500 mt-1">Login with your mobile number</p>
+      </div>
+      <button onclick="closeCustomerAuth()" class="w-9 h-9 bg-slate-100 rounded-full">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <div id="phone-step">
+      <label class="text-xs font-bold">Mobile number</label>
+      <div class="flex gap-2">
+        <span class="bg-slate-100 rounded-xl p-3 text-sm font-bold">+91</span>
+        <input id="customer-phone" class="field" type="tel" maxlength="10"
+          placeholder="10-digit mobile number">
+      </div>
+      <button onclick="sendCustomerOTP()" class="btn-primary w-full rounded-xl p-3 font-bold mt-3">
+        Send OTP
+      </button>
+    </div>
+
+    <div id="otp-step" class="hidden">
+      <label class="text-xs font-bold">Enter OTP</label>
+      <input id="customer-otp" class="field text-center tracking-[.4em]"
+        type="text" inputmode="numeric" maxlength="6" placeholder="6-digit OTP">
+      <button onclick="verifyCustomerOTP()" class="btn-primary w-full rounded-xl p-3 font-bold mt-3">
+        Verify & Login
+      </button>
+      <button onclick="backToPhone()" class="w-full text-green-700 text-xs font-bold mt-3">
+        Change mobile number
+      </button>
+    </div>
+
+    <div id="recaptcha-container"></div>
+    <p id="customer-auth-message" class="text-xs text-center mt-4 text-red-600"></p>
+  </section>
+</div>
+
+  <!-- Reusable modal -->
+  <div id="modal-overlay" class="overlay fixed inset-0 z-50 hidden items-center justify-center p-4" onclick="if(event.target===this)closeModal()">
+    <section class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-5">
+      <div class="flex justify-between items-center mb-4"><h3 id="modal-title" class="font-extrabold text-lg">Details</h3><button onclick="closeModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500"><i class="fa-solid fa-xmark"></i></button></div>
+      <div id="modal-content"></div>
+    </section>
+  </div>
+  <div id="toast" class="hidden toast fixed top-20 left-1/2 -translate-x-1/2 z-[60] bg-slate-900 text-white text-xs font-semibold px-4 py-3 rounded-xl shadow-xl max-w-[90vw] text-center"></div>
+
+<script>
+'use strict';
+const STORAGE_KEY = 'gaonbazaar_professional_v1';
+const SAMPLE_PRODUCTS = [
+  {id:1,name:'Mustard Oil',localName:'सरसों का तेल',weight:'1 L',price:145,shop:'Shree Ram General Store',category:'Grocery',stock:20,emoji:'🫗',active:true},
+  {id:2,name:'Wheat Flour',localName:'आटा',weight:'5 kg',price:230,shop:'Shree Ram General Store',category:'Grocery',stock:15,emoji:'🌾',active:true},
+  {id:3,name:'Fresh Potato',localName:'आलू',weight:'1 kg',price:25,shop:'Maa Vegetable Store',category:'Vegetables',stock:30,emoji:'🥔',active:true},
+  {id:4,name:'Red Onion',localName:'प्याज',weight:'1 kg',price:30,shop:'Maa Vegetable Store',category:'Vegetables',stock:25,emoji:'🧅',active:true},
+  {id:5,name:'Fresh Milk',localName:'दूध',weight:'500 ml',price:30,shop:'Village Dairy',category:'Dairy',stock:40,emoji:'🥛',active:true},
+  {id:6,name:'Sugar',localName:'चीनी',weight:'1 kg',price:44,shop:'Shree Ram General Store',category:'Grocery',stock:18,emoji:'🍚',active:true},
+  {id:7,name:'Tomato',localName:'टमाटर',weight:'1 kg',price:35,shop:'Maa Vegetable Store',category:'Vegetables',stock:22,emoji:'🍅',active:true},
+  {id:8,name:'Paneer',localName:'पनीर',weight:'200 g',price:85,shop:'Village Dairy',category:'Dairy',stock:12,emoji:'🧀',active:true}
+];
+function loadState(){
+  try {
+    const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');
+    return saved && typeof saved==='object' ? {...saved,products:Array.isArray(saved.products)?saved.products:SAMPLE_PRODUCTS,cart:Array.isArray(saved.cart)?saved.cart:[],orders:Array.isArray(saved.orders)?saved.orders:[],profile:saved.profile||{name:'',phone:''},address:saved.address||'',role:saved.role||'customer',category:saved.category||'All',search:saved.search||'',fulfillment:saved.fulfillment||'delivery'} : {products:SAMPLE_PRODUCTS,cart:[],orders:[],profile:{name:'',phone:''},address:'',role:'customer',category:'All',search:'',fulfillment:'delivery'};
+  } catch(e){ return {products:SAMPLE_PRODUCTS,cart:[],orders:[],profile:{name:'',phone:''},address:'',role:'customer',category:'All',search:'',fulfillment:'delivery'}; }
+}
+let state=loadState();
+state.role='customer';
+function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}
+function money(n){return '₹'+Number(n||0).toLocaleString('en-IN',{maximumFractionDigits:2});}
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.remove('hidden');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.add('hidden'),2400);}
+function setHeader() {
+  document.getElementById('header-address').textContent =
+    state.address || 'Add your delivery address';
+
+  document.getElementById('profile-label').textContent =
+    state.profile.name || 'Your account';
+
+  document.querySelectorAll('[data-role]').forEach(b =>
+    b.classList.toggle('active', b.dataset.role === state.role)
+  );
+
+  const count = state.cart.reduce((s, x) => s + x.qty, 0);
+  const total = cartTotal();
+
+  document.getElementById('cart-count').textContent = count;
+  document.getElementById('mobile-cart-count').textContent =
+    count + ' item' + (count === 1 ? '' : 's');
+
+  document.getElementById('mobile-cart-total').textContent = money(total);
+
+  document.getElementById('mobile-cart').classList.toggle(
+    'hidden',
+    state.role !== 'customer' || count === 0
+  );
+}
+function switchRole(role){}
+function returnToStore(){render();}
+function render(){state.role='customer';setHeader();renderCustomer(); }
+function renderCustomer(){
+  const categories=['All','Grocery','Vegetables','Dairy'];
+  const term=state.search.toLowerCase();
+  const products=state.products.filter(p=>p.active&&p.stock>0&&(state.category==='All'||p.category===state.category)&&(`${p.name} ${p.localName||''} ${p.shop}`).toLowerCase().includes(term));
+  const activeOrders = state.orders.filter(
+  o => !['Delivered', 'Cancelled'].includes(o.status)
+);
+  document.getElementById('app').innerHTML=`
+    <section class="rounded-3xl bg-gradient-to-r from-green-900 to-green-700 text-white p-6 md:p-8 mb-6 overflow-hidden relative">
+      <div class="relative z-10 max-w-2xl"><span class="inline-flex bg-white/15 rounded-full px-3 py-1 text-[10px] font-bold tracking-wider uppercase">Shop local. Shop easy.</span>
+      <h1 class="text-2xl md:text-3xl font-extrabold mt-3 leading-tight">Everyday essentials,<br class="hidden sm:block"> from stores around you.</h1>
+      <p class="text-sm text-green-100 mt-2 max-w-lg">Discover groceries, fresh vegetables and dairy products from your neighbourhood shops.</p>
+      <button onclick="openAddress()" class="mt-5 bg-white text-green-900 rounded-xl px-4 py-2.5 text-xs font-extrabold"><i class="fa-solid fa-location-dot mr-2"></i>${state.address?'Update delivery address':'Add delivery address'}</button></div>
+      <div class="absolute -right-8 -bottom-12 text-[170px] opacity-10">🛍️</div>
+    </section>
+<section class="panel p-4 mb-6 flex items-center justify-between gap-3">
+  <div>
+    <h2 class="font-extrabold">My Orders</h2>
+    <p class="text-xs text-slate-500 mt-1">
+      Track current orders and view your order history.
+    </p>
+  </div>
+  <button onclick="renderMyOrders()"
+    class="btn-primary rounded-xl px-4 py-3 text-xs font-bold whitespace-nowrap">
+    View Orders <i class="fa-solid fa-arrow-right ml-1"></i>
+  </button>
+</section>
+    ${activeOrders.length?`<section class="mb-7"><div class="flex items-center justify-between mb-3"><h2 class="font-extrabold text-lg">Your active orders</h2><span class="text-xs text-slate-500">${activeOrders.length} in progress</span></div><div class="grid md:grid-cols-2 gap-3">${activeOrders.map(orderCard).join('')}</div></section>`:''}
+    <section class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-4"><div><p class="text-xs font-bold text-green-700 uppercase tracking-wider">Local marketplace</p><h2 class="text-xl font-extrabold mt-1">Shop essentials</h2></div><div class="relative w-full sm:max-w-xs"><i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i><input id="product-search" class="field pl-9" placeholder="Search products or stores..." value="${esc(state.search)}" oninput="setSearch(this.value)"></div></section>
+    <div class="flex gap-2 overflow-x-auto no-scrollbar pb-3 mb-2">${categories.map(c=>`<button onclick="setCategory('${c}')" class="chip ${state.category===c?'active':''} rounded-full px-4 py-2 text-xs font-bold whitespace-nowrap">${c}</button>`).join('')}</div>
+    ${products.length?`<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">${products.map(productCard).join('')}</div>`:`<div class="panel p-10 text-center"><div class="text-4xl mb-3">🔎</div><h3 class="font-extrabold">No products found</h3><p class="text-sm text-slate-500 mt-1">Try another search or category.</p><button onclick="clearFilters()" class="mt-4 text-green-700 text-xs font-bold">Clear filters</button></div>`}
+    <p class="text-[11px] text-slate-400 mt-6 text-center">Sample catalogue for preview. Product availability and prices are managed by the store.</p>`;
+}
+function productCard(p){
+  const item=state.cart.find(x=>x.id===p.id);
+  return `<article class="product-card panel p-3 flex flex-col min-w-0"><div class="h-28 sm:h-32 rounded-xl bg-[#f3f7f3] flex items-center justify-center text-5xl">${esc(p.emoji||'📦')}</div><div class="mt-3 flex-1"><p class="text-[10px] text-slate-500 truncate">${esc(p.shop)}</p><h3 class="font-extrabold text-sm mt-1 leading-snug">${esc(p.name)}</h3><p class="text-[11px] text-slate-500 mt-0.5">${esc(p.localName||'')} ${esc(p.weight)}</p></div><div class="flex items-center justify-between gap-2 mt-3"><span class="font-extrabold">${money(p.price)}</span>${item?`<div class="flex items-center gap-2 bg-green-700 text-white rounded-lg px-2 py-1"><button aria-label="Decrease quantity" onclick="changeCart(${p.id},-1)">−</button><b class="text-xs">${item.qty}</b><button aria-label="Increase quantity" onclick="changeCart(${p.id},1)">+</button></div>`:`<button onclick="changeCart(${p.id},1)" class="border border-green-700 text-green-800 hover:bg-green-50 rounded-lg px-3 py-1.5 text-xs font-extrabold">ADD</button>`}</div></article>`;
+}
+function orderCard(o) {
+  return `
+    <article class="panel p-4">
+      <div class="flex justify-between gap-2">
+        <div>
+          <p class="text-xs text-slate-500">Order #${esc(o.id)}</p>
+          <p class="font-extrabold text-sm mt-1">${esc(o.status)}</p>
+        </div>
+        <span class="text-xs font-bold text-green-700">${money(o.total)}</span>
+      </div>
+      <p class="text-xs text-slate-500 mt-2">
+        ${o.mode==='pickup'?'Store pickup':'Home delivery'}
+        · ${o.items.length} product type(s)
+      </p>
+      <button onclick="openOrderDetails('${esc(o.id)}')"
+        class="mt-3 text-xs font-extrabold text-green-700 hover:underline">
+        View order details <i class="fa-solid fa-arrow-right ml-1"></i>
+      </button>
+    </article>
+  `;
+}
+function renderMyOrders() {
+  const orders = [...state.orders].sort(
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+  );
+
+  const active = orders.filter(
+    o => !['Delivered', 'Cancelled'].includes(o.status)
+  );
+
+  const completed = orders.filter(
+    o => ['Delivered', 'Cancelled'].includes(o.status)
+  );
+
+  document.getElementById('app').innerHTML = `
+    <div class="mb-5">
+      <button onclick="render()"
+        class="text-xs font-bold text-green-700 mb-4">
+        <i class="fa-solid fa-arrow-left mr-1"></i> Back to shopping
+      </button>
+
+      <p class="text-xs text-green-700 font-bold uppercase tracking-wider">
+        Your account
+      </p>
+      <h1 class="text-2xl font-extrabold mt-1">My Orders</h1>
+      <p class="text-sm text-slate-500 mt-1">
+        Track and manage all your purchases.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-3 gap-3 mb-6">
+      <div class="panel p-3">
+        <p class="text-xs text-slate-500">Total</p>
+        <p class="text-xl font-extrabold mt-1">${orders.length}</p>
+      </div>
+      <div class="panel p-3">
+        <p class="text-xs text-slate-500">Active</p>
+        <p class="text-xl font-extrabold text-amber-600 mt-1">${active.length}</p>
+      </div>
+      <div class="panel p-3">
+        <p class="text-xs text-slate-500">Completed</p>
+        <p class="text-xl font-extrabold text-green-700 mt-1">${completed.length}</p>
+      </div>
+    </div>
+
+    ${
+      orders.length
+      ? `
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="font-extrabold">All orders</h2>
+          <span class="text-xs text-slate-500">${orders.length} orders</span>
+        </div>
+
+        <div class="space-y-3">
+          ${orders.map(o => `
+            <article class="panel p-4">
+              <div class="flex justify-between gap-3">
+                <div>
+                  <p class="text-xs text-slate-500">Order #${esc(o.id)}</p>
+                  <h3 class="font-extrabold mt-1">${esc(o.status)}</h3>
+                  <p class="text-[11px] text-slate-400 mt-1">
+                    ${new Date(o.createdAt).toLocaleString('en-IN')}
+                  </p>
+                </div>
+                <div class="text-right">
+                  <p class="font-extrabold">${money(o.total)}</p>
+                  <span class="text-[10px] text-slate-500">
+                    ${o.mode==='pickup'?'Store pickup':'Home delivery'}
+                  </span>
+                </div>
+              </div>
+
+              <div class="border-t border-slate-100 mt-3 pt-3 flex justify-between items-center">
+                <span class="text-xs text-slate-500">
+                  ${o.items.length} product type(s)
+                </span>
+                <button onclick="openOrderDetails('${esc(o.id)}')"
+                  class="text-xs font-extrabold text-green-700">
+                  View details <i class="fa-solid fa-arrow-right ml-1"></i>
+                </button>
+              </div>
+            </article>
+          `).join('')}
+        </div>
+      `
+      : `
+        <div class="panel p-10 text-center">
+          <i class="fa-solid fa-bag-shopping text-4xl text-slate-300"></i>
+          <h3 class="font-extrabold mt-3">No orders yet</h3>
+          <p class="text-sm text-slate-500 mt-1">
+            Your placed orders will appear here.
+          </p>
+          <button onclick="render()"
+            class="btn-primary rounded-xl px-5 py-3 text-xs font-bold mt-4">
+            Start shopping
+          </button>
+        </div>
+      `
+    }
+  `;
+}
+
+function openOrderDetails(id) {
+  const o = state.orders.find(x => x.id == id);
+  if (!o) return toast('Order not found.');
+
+  const steps = [
+    'Order Placed',
+    'Picking in Progress',
+    'Packing Complete',
+    ...(o.mode === 'delivery'
+      ? ['Picked Up (Out for Delivery)']
+      : []),
+    'Delivered'
+  ];
+
+  const currentStep = steps.indexOf(o.status);
+  const cancelled = o.status === 'Cancelled';
+
+  const progress = cancelled
+    ? 0
+    : Math.max(0, ((currentStep + 1) / steps.length) * 100);
+
+  const date = new Date(o.createdAt).toLocaleString('en-IN');
+
+  openModal('Order Details', `
+    <div class="bg-slate-50 rounded-xl p-3 mb-4">
+      <div class="flex justify-between gap-2">
+        <div>
+          <p class="text-[11px] text-slate-500">Order ID</p>
+          <p class="font-extrabold">#${esc(o.id)}</p>
+        </div>
+        <span class="text-xs font-bold ${
+          cancelled ? 'text-red-600' :
+          o.status === 'Delivered' ? 'text-green-700' :
+          'text-amber-700'
+        }">${esc(o.status)}</span>
+      </div>
+      <p class="text-[11px] text-slate-500 mt-2">${date}</p>
+    </div>
+
+    <h4 class="font-extrabold text-sm mb-3">Order tracking</h4>
+
+    ${
+      cancelled
+      ? `<p class="text-sm text-red-600 bg-red-50 p-3 rounded-xl">
+          This order has been cancelled.
+        </p>`
+      : `
+        <div class="h-2 bg-slate-100 rounded-full overflow-hidden mb-3">
+          <div class="h-full bg-green-600 rounded-full"
+            style="width:${progress}%"></div>
+        </div>
+
+        <div class="space-y-2 mb-5">
+          ${steps.map((step, index) => `
+            <div class="flex items-center gap-2 text-xs ${
+              index <= currentStep
+                ? 'text-green-700 font-bold'
+                : 'text-slate-400'
+            }">
+              <i class="fa-solid ${
+                index <= currentStep
+                  ? 'fa-circle-check'
+                  : 'fa-circle'
+              }"></i>
+              ${step}
+            </div>
+          `).join('')}
+        </div>
+      `
+    }
+
+    <div class="border-t pt-4">
+      <h4 class="font-extrabold text-sm mb-3">Items ordered</h4>
+
+      <div class="space-y-3">
+        ${o.items.map(item => `
+          <div class="flex justify-between gap-3 text-xs">
+            <div>
+              <p class="font-bold">${esc(item.name)}</p>
+              <p class="text-slate-500 mt-1">
+                ${esc(item.weight || '')} × ${item.qty}
+              </p>
+            </div>
+            <b>${money(item.price * item.qty)}</b>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="border-t mt-4 pt-3 space-y-2 text-xs">
+      <div class="flex justify-between">
+        <span class="text-slate-500">Items total</span>
+        <b>${money(o.subtotal)}</b>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-slate-500">Delivery fee</span>
+        <b>${o.fee ? money(o.fee) : 'Free'}</b>
+      </div>
+      <div class="flex justify-between text-sm font-extrabold border-t pt-3">
+        <span>Grand total</span>
+        <span class="text-green-700">${money(o.total)}</span>
+      </div>
+    </div>
+
+    <div class="bg-slate-50 rounded-xl p-3 mt-4 text-xs">
+      <p class="font-extrabold mb-2">Delivery information</p>
+      <p class="text-slate-600">${esc(o.customerName)}</p>
+      <p class="text-slate-600">${esc(o.customerPhone)}</p>
+      <p class="text-slate-600 mt-1">${esc(o.address)}</p>
+      <p class="text-slate-500 mt-2">
+        ${o.mode === 'pickup' ? 'Store pickup' : 'Home delivery'}
+      </p>
+    </div>
+
+    ${
+      o.mode === 'delivery' && o.status !== 'Delivered' && !cancelled
+      ? `
+        <div class="bg-green-50 rounded-xl p-3 mt-3">
+          <p class="text-xs font-bold text-green-800">
+            Delivery OTP: ${esc(o.otp)}
+          </p>
+          <p class="text-[10px] text-green-700 mt-1">
+            Share this OTP with the delivery partner after receiving your order.
+          </p>
+        </div>
+      `
+      : ''
+    }
+
+    <button onclick="closeModal()"
+      class="btn-primary w-full rounded-xl py-3 font-bold text-sm mt-4">
+      Close
+    </button>
+  `);
+}
+function setCategory(c){state.category=c;save();renderCustomer();}
+function setSearch(v){state.search=v;save();const pos=document.getElementById('product-search')?.selectionStart;renderCustomer();const input=document.getElementById('product-search');input?.focus();if(pos!==undefined)input?.setSelectionRange(pos,pos);}
+function clearFilters(){state.search='';state.category='All';save();renderCustomer();}
+function changeCart(id, delta) {
+  const p = state.products.find(x => x.id === id);
+
+  if (!p) return;
+
+  let item = state.cart.find(x => x.id === id);
+
+  if (!item && delta > 0) {
+    if (p.stock < 1) {
+      return toast('This product is out of stock.');
+    }
+
+    state.cart.push({ id, qty: 1 });
+  }
+  else if (item) {
+    if (delta > 0 && item.qty >= p.stock) {
+      return toast('Available stock limit reached.');
+    }
+
+    item.qty += delta;
+
+    if (item.qty <= 0) {
+      state.cart = state.cart.filter(x => x.id !== id);
+    }
+  }
+
+  save();
+
+  // Update header cart count and Go to Cart button
+  setHeader();
+
+  // Refresh product cards
+  renderCustomer();
+
+  // Refresh cart drawer if it is already open
+  const cartOverlay = document.getElementById('cart-overlay');
+
+  if (!cartOverlay.classList.contains('hidden')) {
+    renderCart();
+  }
+
+  if (delta > 0) {
+    toast('Product added to cart successfully!');
+  }
+}
+function cartItems(){return state.cart.map(c=>{const p=state.products.find(x=>x.id===c.id);return p?{...p,qty:c.qty}:null;}).filter(Boolean);}
+function cartTotal(){return cartItems().reduce((s,p)=>s+p.price*p.qty,0);}
+function openCart(){
+  if(!state.cart.length)return toast('Your cart is empty.');
+  document.getElementById('checkout-address').value=state.address;
+  document.getElementById('checkout-name').value=state.profile.name;
+  document.getElementById('checkout-phone').value=state.profile.phone;
+  document.getElementById('cart-overlay').classList.remove('hidden');
+  renderCart();
+}
+function closeCart(){document.getElementById('cart-overlay').classList.add('hidden');}
+function setFulfillment(mode){state.fulfillment=mode;document.getElementById('delivery-option').className=mode==='delivery'?'rounded-xl border-2 border-green-700 bg-green-50 p-3 text-left':'rounded-xl border border-slate-200 p-3 text-left';document.getElementById('pickup-option').className=mode==='pickup'?'rounded-xl border-2 border-green-700 bg-green-50 p-3 text-left':'rounded-xl border border-slate-200 p-3 text-left';document.getElementById('delivery-address-wrap').classList.toggle('hidden',mode==='pickup');renderCart();}
+function renderCart(){
+  const items=cartItems();
+  document.getElementById('cart-lines').innerHTML=items.length?items.map(p=>`<div class="flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-slate-50 flex items-center justify-center text-2xl">${esc(p.emoji||'📦')}</div><div class="flex-1 min-w-0"><p class="text-xs font-extrabold truncate">${esc(p.name)}</p><p class="text-[11px] text-slate-500">${money(p.price)} × ${p.qty}</p></div><div class="flex items-center gap-2 border rounded-lg px-2 py-1"><button onclick="changeCart(${p.id},-1)">−</button><b class="text-xs">${p.qty}</b><button onclick="changeCart(${p.id},1)">+</button></div><b class="text-xs">${money(p.price*p.qty)}</b></div>`).join(''):`<p class="text-sm text-slate-500 text-center py-5">Your cart is empty.</p>`;
+  const subtotal=cartTotal(),fee=state.fulfillment==='pickup'||subtotal>=299?0:20,total=subtotal+fee;
+  document.getElementById('subtotal').textContent=money(subtotal);document.getElementById('delivery-fee').textContent=fee?money(fee):'Free';document.getElementById('grand-total').textContent=money(total);document.getElementById('place-total').innerHTML=money(total)+' <i class="fa-solid fa-arrow-right ml-2"></i>';
+  document.getElementById('delivery-option').className=state.fulfillment==='delivery'?'rounded-xl border-2 border-green-700 bg-green-50 p-3 text-left':'rounded-xl border border-slate-200 p-3 text-left';
+  document.getElementById('pickup-option').className=state.fulfillment==='pickup'?'rounded-xl border-2 border-green-700 bg-green-50 p-3 text-left':'rounded-xl border border-slate-200 p-3 text-left';
+  document.getElementById('delivery-address-wrap').classList.toggle('hidden',state.fulfillment==='pickup');
+}
+function placeOrder(){
+  const items=cartItems(),name=document.getElementById('checkout-name').value.trim(),phone=document.getElementById('checkout-phone').value.trim(),address=document.getElementById('checkout-address').value.trim();
+  if(!items.length)return toast('Your cart is empty.');
+  if(!name)return toast('Please enter your name.');
+  if(!/^[6-9]\d{9}$/.test(phone))return toast('Enter a valid 10-digit mobile number.');
+  if(state.fulfillment==='delivery'&&!address)return toast('Please enter your delivery address.');
+  for(const item of items){const p=state.products.find(x=>x.id===item.id);if(!p||p.stock<item.qty)return toast('Stock changed. Please review your cart.');}
+  items.forEach(item=>{const p=state.products.find(x=>x.id===item.id);p.stock-=item.qty;});
+  const subtotal=items.reduce((s,p)=>s+p.price*p.qty,0),fee=state.fulfillment==='pickup'||subtotal>=299?0:20;
+  const order={id:Date.now().toString().slice(-8),customerName:name,customerPhone:phone,address:state.fulfillment==='pickup'?'Store pickup':address,items:items.map(p=>({id:p.id,name:p.name,weight:p.weight,price:p.price,qty:p.qty})),subtotal,total:subtotal+fee,fee,mode:state.fulfillment,status:'Order Placed',otp:String(Math.floor(1000+Math.random()*9000)),createdAt:new Date().toISOString()};
+  state.orders.unshift(order);state.cart=[];state.profile={name,phone};if(state.fulfillment==='delivery')state.address=address;save();closeCart();render();toast('Your order has been placed.');
+}
+function renderShop(){
+ const active=state.orders.filter(o=>!['Delivered','Cancelled'].includes(o.status));
+ const sold=state.orders.filter(o=>o.status==='Delivered').reduce((s,o)=>s+o.items.reduce((n,i)=>n+i.qty,0),0);
+ const stock=state.products.reduce((s,p)=>s+p.stock,0);
+ document.getElementById('app').innerHTML=`
+ <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-5"><div><p class="text-xs text-green-700 font-bold uppercase tracking-wider">Store workspace</p><h1 class="text-2xl font-extrabold mt-1">Store management</h1><p class="text-sm text-slate-500 mt-1">Manage products, stock and incoming orders.</p></div><span class="rounded-full bg-amber-50 text-amber-800 px-3 py-1.5 text-[11px] font-bold w-fit">Preview data · Saved on this device</span></div>
+ <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">${statCard('Active orders',active.length,'fa-clipboard-list','blue')}${statCard('Products',state.products.length,'fa-box','green')}${statCard('Units in stock',stock,'fa-boxes-stacked','amber')}${statCard('Units delivered',sold,'fa-check-circle','purple')}</div>
+ <section class="panel p-4 mb-6"><div class="flex items-center justify-between mb-3"><h2 class="font-extrabold">Incoming orders</h2><span class="text-xs text-slate-500">${active.length} active</span></div>${active.length?`<div class="space-y-3">${active.map(shopOrderCard).join('')}</div>`:`<div class="text-center py-7 text-sm text-slate-500"><i class="fa-regular fa-circle-check text-2xl mb-2 block text-green-600"></i>No active orders right now.</div>`}</section>
+ <section class="panel p-4 mb-5"><h2 class="font-extrabold mb-1">Add a product</h2><p class="text-xs text-slate-500 mb-4">Enter product details to add it to the catalogue.</p><div class="grid sm:grid-cols-2 lg:grid-cols-6 gap-2"><input id="new-name" class="field" placeholder="Product name"><input id="new-local" class="field" placeholder="Local name (optional)"><input id="new-weight" class="field" placeholder="Pack size e.g. 1 kg"><input id="new-price" class="field" type="number" min="1" placeholder="Price (₹)"><input id="new-stock" class="field" type="number" min="0" placeholder="Stock quantity"><select id="new-category" class="field"><option>Grocery</option><option>Vegetables</option><option>Dairy</option></select></div><button onclick="addProduct()" class="btn-primary rounded-xl px-4 py-2.5 text-xs font-extrabold mt-3"><i class="fa-solid fa-plus mr-1"></i>Add product</button></section>
+ <section class="panel p-4"><div class="flex justify-between items-center mb-3"><h2 class="font-extrabold">Product catalogue</h2><span class="text-xs text-slate-500">${state.products.length} products</span></div><div class="space-y-2">${state.products.map(manageProductCard).join('')}</div></section>`;
+}
+function statCard(label,value,icon,tone){const colors={blue:'bg-blue-50 text-blue-700',green:'bg-green-50 text-green-700',amber:'bg-amber-50 text-amber-700',purple:'bg-violet-50 text-violet-700'};return `<div class="panel p-4"><div class="w-9 h-9 rounded-xl ${colors[tone]} flex items-center justify-center"><i class="fa-solid ${icon}"></i></div><p class="text-xs text-slate-500 mt-3">${label}</p><p class="text-2xl font-extrabold mt-0.5">${value}</p></div>`;}
+function shopOrderCard(o){const canPick=o.status==='Order Placed',canPack=o.status==='Picking in Progress',pickup=o.mode==='pickup';return `<article class="border border-slate-200 rounded-xl p-3"><div class="flex flex-wrap justify-between gap-2"><div><p class="text-xs text-slate-500">Order #${o.id} · ${esc(o.customerName)}</p><p class="font-extrabold text-sm mt-1">${esc(o.status)}</p></div><span class="text-xs font-bold">${money(o.total)}</span></div><p class="text-xs text-slate-500 mt-2">${pickup?'Store pickup':'Home delivery'} · ${esc(o.address)}</p><div class="bg-slate-50 rounded-lg p-2 mt-2 text-xs">${o.items.map(i=>`<div class="flex justify-between py-1"><span>${esc(i.name)} × ${i.qty}</span><b>${money(i.price*i.qty)}</b></div>`).join('')}</div><div class="mt-3 flex justify-end">${canPick?`<button onclick="updateOrder(${o.id},'Picking in Progress')" class="btn-primary rounded-lg px-3 py-2 text-xs font-bold">Start preparing</button>`:canPack?`<button onclick="updateOrder(${o.id},'Packing Complete')" class="btn-primary rounded-lg px-3 py-2 text-xs font-bold">Mark ready</button>`:pickup?`<button onclick="completeOrder(${o.id})" class="btn-primary rounded-lg px-3 py-2 text-xs font-bold">Confirm handover</button>`:`<span class="text-xs text-blue-700 font-bold">Waiting for delivery partner</span>`}</div></article>`;}
+function manageProductCard(p){return `<div class="flex flex-wrap items-center gap-3 border-b last:border-0 border-slate-100 py-3"><div class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-2xl">${esc(p.emoji||'📦')}</div><div class="flex-1 min-w-[130px]"><p class="text-sm font-extrabold">${esc(p.name)}</p><p class="text-[11px] text-slate-500">${esc(p.weight)} · ${esc(p.category)}</p></div><label class="text-[11px] text-slate-500">Price <input aria-label="Price" type="number" min="1" value="${p.price}" onchange="updateProduct(${p.id},'price',this.value)" class="w-20 field !py-2 mt-1"></label><label class="text-[11px] text-slate-500">Stock <input aria-label="Stock" type="number" min="0" value="${p.stock}" onchange="updateProduct(${p.id},'stock',this.value)" class="w-20 field !py-2 mt-1"></label><button onclick="toggleProduct(${p.id})" class="rounded-lg px-2.5 py-2 text-[11px] font-bold ${p.active?'bg-green-50 text-green-700':'bg-slate-100 text-slate-500'}">${p.active?'Active':'Hidden'}</button><button onclick="deleteProduct(${p.id})" class="w-8 h-8 rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600" aria-label="Delete product"><i class="fa-regular fa-trash-can"></i></button></div>`;}
+function addProduct(){const name=document.getElementById('new-name').value.trim(),weight=document.getElementById('new-weight').value.trim(),price=Number(document.getElementById('new-price').value),stock=Number(document.getElementById('new-stock').value),category=document.getElementById('new-category').value,localName=document.getElementById('new-local').value.trim();if(!name||!weight||!Number.isFinite(price)||price<=0||!Number.isInteger(stock)||stock<0)return toast('Enter a name, pack size, valid price and stock quantity.');state.products.unshift({id:Date.now(),name,localName,weight,price,stock,category,shop:'Local Store',emoji:'📦',active:true});save();renderShop();toast('Product added.');}
+function updateProduct(id,key,value){const p=state.products.find(x=>x.id===id);if(!p)return;const n=Number(value);if(!Number.isFinite(n)||n<(key==='price'?0:0)||(key==='price'&&n===0)||!Number.isInteger(n)&&key==='stock'){toast('Enter a valid value.');renderShop();return;}p[key]=n;if(key==='stock'&&n===0)p.active=false;save();renderShop();toast('Product updated.');}
+function toggleProduct(id){const p=state.products.find(x=>x.id===id);if(p){p.active=!p.active;save();renderShop();}}
+function deleteProduct(id){if(state.cart.some(x=>x.id===id))state.cart=state.cart.filter(x=>x.id!==id);state.products=state.products.filter(x=>x.id!==id);save();renderShop();toast('Product removed.');}
+function updateOrder(id,status){const o=state.orders.find(x=>x.id==id);if(o){o.status=status;save();renderShop();toast('Order status updated.');}}
+function renderDelivery(){
+ const tasks=state.orders.filter(o=>o.mode==='delivery'&&['Packing Complete','Picked Up (Out for Delivery)'].includes(o.status));
+ const completed=state.orders.filter(o=>o.mode==='delivery'&&o.status==='Delivered').length;
+ document.getElementById('app').innerHTML=`<div class="mb-5"><p class="text-xs text-green-700 font-bold uppercase tracking-wider">Delivery workspace</p><h1 class="text-2xl font-extrabold mt-1">Delivery orders</h1><p class="text-sm text-slate-500 mt-1">View ready orders and confirm delivery using the customer's OTP.</p></div><div class="grid grid-cols-2 gap-3 mb-6">${statCard('Available tasks',tasks.filter(o=>o.status==='Packing Complete').length,'fa-motorcycle','amber')}${statCard('Delivered orders',completed,'fa-check-circle','green')}</div>${tasks.length?`<div class="grid md:grid-cols-2 gap-3">${tasks.map(riderOrderCard).join('')}</div>`:`<div class="panel p-10 text-center"><i class="fa-solid fa-motorcycle text-3xl text-slate-300"></i><h3 class="font-extrabold mt-3">No delivery tasks</h3><p class="text-sm text-slate-500 mt-1">Orders will appear here when the store marks them ready.</p></div>`}`;
+}
+function riderOrderCard(o){return `<article class="panel p-4"><div class="flex justify-between gap-2"><div><p class="text-xs text-slate-500">Order #${o.id}</p><h3 class="font-extrabold mt-1">${esc(o.customerName)}</h3></div><span class="text-xs font-bold text-green-700">${money(o.total)}</span></div><p class="text-xs text-slate-600 mt-3"><i class="fa-solid fa-location-dot text-green-700 mr-1"></i>${esc(o.address)}</p><p class="text-xs text-slate-500 mt-2">${esc(o.customerPhone)}</p>${o.status==='Packing Complete'?`<button onclick="updateOrder(${o.id},'Picked Up (Out for Delivery)')" class="btn-primary w-full rounded-xl py-2.5 text-xs font-bold mt-4">Confirm pickup</button>`:`<div class="mt-4 bg-slate-50 rounded-xl p-3"><label class="block text-xs font-bold mb-2">Enter customer delivery OTP</label><div class="flex gap-2"><input id="otp-${o.id}" class="field" inputmode="numeric" maxlength="4" placeholder="4-digit OTP"><button onclick="verifyOtp(${o.id})" class="btn-primary rounded-xl px-4 text-xs font-bold">Verify</button></div></div>`}</article>`;}
+function verifyOtp(id){const o=state.orders.find(x=>x.id==id),value=document.getElementById('otp-'+id)?.value.trim();if(!o)return;if(value!==o.otp)return toast('OTP does not match.');completeOrder(id);}
+function completeOrder(id){const o=state.orders.find(x=>x.id==id);if(!o||o.status==='Delivered')return;o.status='Delivered';o.deliveredAt=new Date().toISOString();save();render();toast('Order marked as delivered.');}
+function renderAdmin(){
+ const delivered=state.orders.filter(o=>o.status==='Delivered'),active=state.orders.filter(o=>!['Delivered','Cancelled'].includes(o.status)),revenue=delivered.reduce((s,o)=>s+o.subtotal,0);
+ document.getElementById('app').innerHTML=`<div class="mb-5"><p class="text-xs text-green-700 font-bold uppercase tracking-wider">Platform overview</p><h1 class="text-2xl font-extrabold mt-1">Admin dashboard</h1><p class="text-sm text-slate-500 mt-1">A summary of activity recorded in this browser preview.</p></div><div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">${statCard('Total orders',state.orders.length,'fa-receipt','blue')}${statCard('Active orders',active.length,'fa-clock','amber')}${statCard('Delivered',delivered.length,'fa-check-circle','green')}${statCard('Delivered item sales',money(revenue),'fa-indian-rupee-sign','purple')}</div><section class="panel p-4"><div class="flex justify-between items-center mb-3"><h2 class="font-extrabold">Recent orders</h2><span class="text-xs text-slate-500">${state.orders.length} total</span></div>${state.orders.length?`<div class="overflow-x-auto"><table class="w-full text-left min-w-[620px]"><thead><tr class="text-[10px] uppercase tracking-wide text-slate-400 border-b"><th class="py-3">Order</th><th>Customer</th><th>Type</th><th>Status</th><th class="text-right">Total</th></tr></thead><tbody>${state.orders.map(o=>`<tr class="border-b last:border-0 text-xs"><td class="py-3 font-bold">#${o.id}</td><td>${esc(o.customerName)}<div class="text-[10px] text-slate-400">${esc(o.customerPhone)}</div></td><td>${o.mode==='pickup'?'Pickup':'Delivery'}</td><td><span class="rounded-full bg-slate-100 px-2 py-1">${esc(o.status)}</span></td><td class="text-right font-bold">${money(o.total)}</td></tr>`).join('')}</tbody></table></div>`:`<div class="text-center py-8 text-sm text-slate-500">No orders have been placed yet.</div>`}</section><p class="text-[11px] text-slate-400 mt-4">This preview stores data in this browser only. It is not connected to a live multi-user server.</p>`;
+}
+function openModal(title,content){document.getElementById('modal-title').textContent=title;document.getElementById('modal-content').innerHTML=content;document.getElementById('modal-overlay').classList.remove('hidden');document.getElementById('modal-overlay').classList.add('flex');}
+function closeModal(){document.getElementById('modal-overlay').classList.add('hidden');document.getElementById('modal-overlay').classList.remove('flex');}
+function openAddress(){openModal('Delivery address',`<label class="text-xs font-bold text-slate-600 block mb-1.5">Your address</label><textarea id="address-input" class="field min-h-24" placeholder="House, street, village / locality">${esc(state.address)}</textarea><button onclick="saveAddress()" class="btn-primary w-full rounded-xl py-3 font-bold text-sm mt-3">Save address</button>`);}
+function saveAddress(){const v=document.getElementById('address-input').value.trim();if(!v)return toast('Please enter an address.');state.address=v;save();closeModal();setHeader();toast('Address saved.');}
+function openProfile(){openModal('Your account',`<p class="text-xs text-slate-500 mb-4">Add your contact details for order updates.</p><label class="text-xs font-bold text-slate-600 block mb-1.5">Full name</label><input id="profile-name" class="field mb-3" value="${esc(state.profile.name)}" placeholder="Your name"><label class="text-xs font-bold text-slate-600 block mb-1.5">Mobile number</label><input id="profile-phone" class="field" maxlength="10" value="${esc(state.profile.phone)}" placeholder="10-digit mobile number"><button onclick="saveProfile()" class="btn-primary w-full rounded-xl py-3 font-bold text-sm mt-4">Save details</button><p class="text-[10px] text-slate-400 mt-3">Demo profile only. Secure OTP login is not connected.</p>`);}
+function saveProfile(){const name=document.getElementById('profile-name').value.trim(),phone=document.getElementById('profile-phone').value.trim();if(!name)return toast('Enter your name.');if(phone&&!/^[6-9]\d{9}$/.test(phone))return toast('Enter a valid 10-digit mobile number.');state.profile={name,phone};save();closeModal();setHeader();toast('Profile details saved.');}
+function init(){render();}
+init();
+</script>
+
+<script type="module">
+import { initializeApp, getApps, getApp }
+  from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+
+import {
+  getAuth, RecaptchaVerifier, signInWithPhoneNumber,
+  onAuthStateChanged, signOut
+} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
+
+import {
+  getFirestore, doc, getDoc, setDoc, collection,
+  getDocs, query, where, runTransaction, serverTimestamp,
+  orderBy
+} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+
+/* PASTE YOUR FIREBASE WEB API KEY */
+const firebaseConfig = {
+  apiKey: "AIzaSyCuSO-U8o1QYUSR2Ay-mBb7orjgLj4H448",
+  authDomain: "gaonbazaar-297a8.firebaseapp.com",
+  projectId: "gaonbazaar-297a8",
+  storageBucket: "gaonbazaar-297a8.firebasestorage.app",
+  messagingSenderId: "381925642784",
+  appId: "1:381925642784:web:72c4acd4ac69c6605a6245"
+};
+
+const firebaseApp = getApps().length ? getApp() : initializeApp(firebaseConfig);
+const auth = getAuth(firebaseApp);
+const db = getFirestore(firebaseApp);
+
+let confirmationResult = null;
+let recaptchaVerifier = null;
+let firebaseCustomer = null;
+let liveProducts = [];
+
+/* ---------- LOGIN ---------- */
+
+window.openCustomerAuth = function() {
+  document.getElementById("customer-auth").classList.remove("hidden");
+  document.getElementById("customer-auth").classList.add("flex");
+};
+
+window.closeCustomerAuth = function() {
+  document.getElementById("customer-auth").classList.add("hidden");
+  document.getElementById("customer-auth").classList.remove("flex");
+};
+
+window.backToPhone = function() {
+  document.getElementById("phone-step").classList.remove("hidden");
+  document.getElementById("otp-step").classList.add("hidden");
+};
+
+function authMessage(text, error = true) {
+  const el = document.getElementById("customer-auth-message");
+  el.textContent = text;
+  el.className = "text-xs text-center mt-4 " +
+    (error ? "text-red-600" : "text-green-700");
+}
+
+window.sendCustomerOTP = async function() {
+  const phone = document.getElementById("customer-phone").value.trim();
+
+  if (!/^[6-9]\d{9}$/.test(phone)) {
+    return authMessage("Enter a valid 10-digit Indian mobile number.");
+  }
+
+  try {
+    authMessage("Sending OTP...", false);
+
+    if (!recaptchaVerifier) {
+      recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+        size: "invisible"
+      });
+    }
+
+    await recaptchaVerifier.render();
+
+    confirmationResult = await signInWithPhoneNumber(
+      auth, "+91" + phone, recaptchaVerifier
+    );
+
+    document.getElementById("phone-step").classList.add("hidden");
+    document.getElementById("otp-step").classList.remove("hidden");
+    authMessage("OTP sent successfully.", false);
+
+  } catch (error) {
+    authMessage(error.message);
+    if (recaptchaVerifier) {
+      try { await recaptchaVerifier.clear(); } catch (_) {}
+      recaptchaVerifier = null;
+    }
+  }
+};
+
+window.verifyCustomerOTP = async function() {
+  const otp = document.getElementById("customer-otp").value.trim();
+
+  if (!/^\d{6}$/.test(otp)) {
+    return authMessage("Enter the 6-digit OTP.");
+  }
+
+  try {
+    authMessage("Verifying OTP...", false);
+    await confirmationResult.confirm(otp);
+    closeCustomerAuth();
+    authMessage("", false);
+    toast("Login successful!");
+  } catch (error) {
+    authMessage("OTP verification failed: " + error.message);
+  }
+};
+
+/* ---------- CUSTOMER PROFILE ---------- */
+
+async function saveCustomerProfile(user) {
+  const userRef = doc(db, "users", user.uid);
+  const snap = await getDoc(userRef);
+
+  const oldData = snap.exists() ? snap.data() : {};
+
+  await setDoc(userRef, {
+    uid: user.uid,
+    phone: user.phoneNumber,
+    role: "customer",
+    name: oldData.name || "",
+    createdAt: oldData.createdAt || serverTimestamp(),
+    updatedAt: serverTimestamp()
+  }, { merge: true });
+
+  state.profile = {
+    name: oldData.name || state.profile.name || "",
+    phone: user.phoneNumber.replace("+91", "")
+  };
+
+  save();
+  setHeader();
+}
+
+window.saveProfile = async function() {
+  if (!firebaseCustomer) {
+    closeModal();
+    openCustomerAuth();
+    return toast("Please login with your mobile number first.");
+  }
+
+  const name = document.getElementById("profile-name").value.trim();
+  const phone = document.getElementById("profile-phone").value.trim();
+
+  if (!name) return toast("Enter your name.");
+
+  if (!/^[6-9]\d{9}$/.test(phone)) {
+    return toast("Enter a valid 10-digit mobile number.");
+  }
+
+  try {
+    await setDoc(doc(db, "users", firebaseCustomer.uid), {
+      uid: firebaseCustomer.uid,
+      name,
+      phone: firebaseCustomer.phoneNumber,
+      role: "customer",
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+
+    state.profile = { name, phone };
+    save();
+    closeModal();
+    setHeader();
+    toast("Profile saved successfully.");
+  } catch (error) {
+    toast(error.message);
+  }
+};
+
+window.openProfile = function() {
+  if (!firebaseCustomer) {
+    openCustomerAuth();
+    return;
+  }
+
+  openModal("Your account", `
+    <p class="text-xs text-green-700 font-bold mb-3">
+      <i class="fa-solid fa-circle-check mr-1"></i> Logged in
+    </p>
+    <label class="text-xs font-bold text-slate-600 block mb-1.5">Full name</label>
+    <input id="profile-name" class="field mb-3"
+      value="${esc(state.profile.name)}" placeholder="Your name">
+
+    <label class="text-xs font-bold text-slate-600 block mb-1.5">Mobile number</label>
+    <input class="field" value="${esc(state.profile.phone)}" disabled>
+
+    <button onclick="saveProfile()"
+      class="btn-primary w-full rounded-xl py-3 font-bold text-sm mt-4">
+      Save details
+    </button>
+
+    <button onclick="customerLogout()"
+      class="w-full rounded-xl py-3 text-red-600 font-bold text-sm mt-2">
+      Logout
+    </button>
+  `);
+};
+
+window.customerLogout = async function() {
+  await signOut(auth);
+  closeModal();
+  toast("You have been logged out.");
+};
+
+/* ---------- LIVE PRODUCTS FROM ALL SHOPS ---------- */
+
+async function loadLiveProducts() {
+  try {
+    const q = query(
+      collection(db, "products"),
+      where("active", "==", true)
+    );
+
+    const snapshot = await getDocs(q);
+
+    liveProducts = snapshot.docs.map(d => {
+      const p = d.data();
+
+      return {
+        id: d.id,
+        name: p.name || "",
+        localName: p.localName || "",
+        weight: p.weight || p.unit || "",
+        price: Number(p.price || 0),
+        shop: p.shopName || p.shop || "Local Store",
+        shopId: p.shopId,
+        category: p.category || "Grocery",
+        stock: Number(p.stock || 0),
+        emoji: p.emoji || "📦",
+        active: p.active === true
+      };
+    }).filter(p => p.shopId && p.stock > 0 && p.price > 0);
+
+    state.products = liveProducts;
+    state.cart = state.cart.filter(item =>
+      liveProducts.some(p => p.id === item.id)
+    );
+
+    save();
+    render();
+
+  } catch (error) {
+    console.error("Product loading error:", error);
+    toast("Could not load live products. Check Firestore rules.");
+  }
+}
+
+/* Override product card so Firestore string IDs work */
+window.productCard = function(p) {
+  const item = state.cart.find(x => x.id === p.id);
+
+  return `
+  <article class="product-card panel p-3 flex flex-col min-w-0">
+    <div class="h-28 sm:h-32 rounded-xl bg-[#f3f7f3] flex items-center justify-center text-5xl">
+      ${esc(p.emoji)}
+    </div>
+    <div class="mt-3 flex-1">
+      <p class="text-[10px] text-slate-500 truncate">${esc(p.shop)}</p>
+      <h3 class="font-extrabold text-sm mt-1">${esc(p.name)}</h3>
+      <p class="text-[11px] text-slate-500 mt-1">${esc(p.weight)}</p>
+    </div>
+    <div class="flex items-center justify-between gap-2 mt-3">
+      <span class="font-extrabold">${money(p.price)}</span>
+      ${item ? `
+        <div class="flex items-center gap-2 bg-green-700 text-white rounded-lg px-2 py-1">
+          <button onclick="changeCart('${p.id}',-1)">−</button>
+          <b class="text-xs">${item.qty}</b>
+          <button onclick="changeCart('${p.id}',1)">+</button>
+        </div>
+      ` : `
+        <button onclick="changeCart('${p.id}',1)"
+          class="border border-green-700 text-green-800 rounded-lg px-3 py-1.5 text-xs font-extrabold">
+          ADD
+        </button>
+      `}
+    </div>
+  </article>`;
+};
+
+/* Override cart item lookup for string document IDs */
+window.cartItems = function() {
+  return state.cart.map(c => {
+    const p = state.products.find(x => x.id === c.id);
+    return p ? { ...p, qty: c.qty } : null;
+  }).filter(Boolean);
+};
+
+/* ---------- FIREBASE CHECKOUT ---------- */
+
+window.placeOrder = async function() {
+  if (!firebaseCustomer) {
+    closeCart();
+    openCustomerAuth();
+    return toast("Login with your mobile number before placing an order.");
+  }
+
+  const items = cartItems();
+  const name = document.getElementById("checkout-name").value.trim();
+  const phone = document.getElementById("checkout-phone").value.trim();
+  const address = document.getElementById("checkout-address").value.trim();
+
+  if (!items.length) return toast("Your cart is empty.");
+  if (!name) return toast("Please enter your name.");
+  if (!/^[6-9]\d{9}$/.test(phone)) return toast("Enter a valid mobile number.");
+  if (state.fulfillment === "delivery" && !address) {
+    return toast("Please enter your delivery address.");
+  }
+
+  const button = document.querySelector("#cart-overlay button[onclick='placeOrder()']");
+  if (button) button.disabled = true;
+
+  try {
+    const grouped = {};
+
+    for (const item of items) {
+      if (!item.shopId) throw new Error("A product has no shop ID. Please refresh the catalogue.");
+      if (!grouped[item.shopId]) grouped[item.shopId] = [];
+      grouped[item.shopId].push(item);
+    }
+
+    const checkoutId = crypto.randomUUID();
+    const orderRefs = Object.keys(grouped).map(() =>
+      doc(collection(db, "orders"))
+    );
+
+    await runTransaction(db, async transaction => {
+      const productRefs = items.map(item => doc(db, "products", item.id));
+      const productSnaps = [];
+
+      for (const ref of productRefs) {
+        productSnaps.push(await transaction.get(ref));
+      }
+
+      productSnaps.forEach((snap, index) => {
+        if (!snap.exists()) throw new Error("A product is no longer available.");
+
+        const product = snap.data();
+        const cartItem = items[index];
+
+        if (product.active !== true ||
+            Number(product.stock) < cartItem.qty ||
+            product.shopId !== cartItem.shopId) {
+          throw new Error("Stock changed. Please review your cart.");
+        }
+      });
+
+      productSnaps.forEach((snap, index) => {
+        const product = snap.data();
+        const cartItem = items[index];
+
+        transaction.update(productRefs[index], {
+          stock: Number(product.stock) - cartItem.qty,
+          updatedAt: serverTimestamp()
+        });
+      });
+
+      Object.keys(grouped).forEach((shopId, index) => {
+        const shopItems = grouped[shopId];
+        const subtotal = shopItems.reduce(
+          (sum, item) => sum + item.price * item.qty, 0
+        );
+        const fee = state.fulfillment === "pickup" || subtotal >= 299 ? 0 : 20;
+
+        transaction.set(orderRefs[index], {
+          checkoutId,
+          customerUid: firebaseCustomer.uid,
+          customerName: name,
+          customerPhone: firebaseCustomer.phoneNumber,
+          shopId,
+          items: shopItems.map(item => ({
+            productId: item.id,
+            name: item.name,
+            weight: item.weight,
+            price: item.price,
+            qty: item.qty
+          })),
+          subtotal,
+          deliveryFee: fee,
+          total: subtotal + fee,
+          mode: state.fulfillment,
+          address: state.fulfillment === "pickup" ? "Store pickup" : address,
+          status: "Order Placed",
+          createdAt: serverTimestamp()
+        });
+      });
+    });
+
+    await setDoc(doc(db, "users", firebaseCustomer.uid), {
+      uid: firebaseCustomer.uid,
+      name,
+      phone: firebaseCustomer.phoneNumber,
+      role: "customer",
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+
+    state.cart = [];
+    state.profile = { name, phone };
+    if (state.fulfillment === "delivery") state.address = address;
+    save();
+
+    closeCart();
+    await loadLiveProducts();
+    await loadCustomerOrders();
+    render();
+    toast("Your order has been placed successfully!");
+
+  } catch (error) {
+    console.error(error);
+    toast(error.message || "Could not place order.");
+  } finally {
+    if (button) button.disabled = false;
+  }
+};
+
+/* ---------- CUSTOMER'S OWN ORDERS ---------- */
+
+async function loadCustomerOrders() {
+  if (!firebaseCustomer) {
+    state.orders = [];
+    return;
+  }
+
+  try {
+    const q = query(
+      collection(db, "orders"),
+      where("customerUid", "==", firebaseCustomer.uid)
+    );
+
+    const snapshot = await getDocs(q);
+
+    state.orders = snapshot.docs.map(d => {
+      const o = d.data();
+      return {
+        id: d.id,
+        customerName: o.customerName || "",
+        customerPhone: o.customerPhone || "",
+        address: o.address || "",
+        items: o.items || [],
+        subtotal: o.subtotal || 0,
+        fee: o.deliveryFee || 0,
+        total: o.total || 0,
+        mode: o.mode || "delivery",
+        status: o.status || "Order Placed",
+        createdAt: o.createdAt?.toDate
+          ? o.createdAt.toDate().toISOString()
+          : new Date().toISOString()
+      };
+    }).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    save();
+  } catch (error) {
+    console.error("Order loading error:", error);
+    toast("Could not load your orders.");
+  }
+}
+
+/* ---------- AUTH SESSION ---------- */
+
+onAuthStateChanged(auth, async user => {
+  firebaseCustomer = user || null;
+
+  if (user) {
+    try {
+      await saveCustomerProfile(user);
+      await loadCustomerOrders();
+      await loadLiveProducts();
+      setHeader();
+    } catch (error) {
+      console.error(error);
+      toast("Account loading failed: " + error.message);
+    }
+  } else {
+    state.orders = [];
+    state.cart = [];
+    save();
+    setHeader();
+  }
+});
+
+/* ---------- ADDRESS AND PROFILE BUTTON ---------- */
+
+const originalOpenAddress = window.openAddress;
+
+window.openAddress = function() {
+  if (!firebaseCustomer) {
+    openCustomerAuth();
+    return toast("Login first to save your delivery address.");
+  }
+  originalOpenAddress();
+};
+
+/* Existing app has no active customer login requirement for browsing */
+loadLiveProducts();
+</script>
+</body>
+</html>
